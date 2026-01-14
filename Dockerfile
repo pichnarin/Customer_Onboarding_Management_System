@@ -40,10 +40,18 @@ RUN composer install --optimize-autoloader
 # Create keys directory and set permissions
 RUN mkdir -p storage/keys && chmod -R 775 storage bootstrap/cache
 
+# Create storage directories for volume mount
+RUN mkdir -p storage/app/public/documents
+
 # Create startup script
 RUN echo '#!/bin/bash\n\
 set -e\n\
 PORT=${PORT:-8000}\n\
+echo "Setting up storage directories..."\n\
+mkdir -p storage/app/public/documents\n\
+chmod -R 775 storage\n\
+echo "Creating storage symlink..."\n\
+php artisan storage:link --force\n\
 echo "Running migrations..."\n\
 php artisan migrate --force\n\
 echo "Seeding database..."\n\

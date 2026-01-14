@@ -106,15 +106,28 @@ class UserService
      */
     private function createPersonalInformation(string $userId, array $data): PersonalInformation
     {
+        Log::info('Creating personal information for user', ['user_id' => $userId, 'has_files' => [
+            'professtional_photo' => isset($data['professtional_photo']) && $data['professtional_photo'] instanceof UploadedFile,
+            'nationality_card' => isset($data['nationality_card']) && $data['nationality_card'] instanceof UploadedFile,
+            'family_book' => isset($data['family_book']) && $data['family_book'] instanceof UploadedFile,
+            'birth_certificate' => isset($data['birth_certificate']) && $data['birth_certificate'] instanceof UploadedFile,
+            'degreee_certificate' => isset($data['degreee_certificate']) && $data['degreee_certificate'] instanceof UploadedFile,
+        ]]);
+
         $personalInfoData = [
             'user_id' => $userId,
-            'professtional_photo' => $this->uploadDocument($data['professtional_photo'], 'professtional_photos'),
-            'nationality_card' => $this->uploadDocument($data['nationality_card'], 'nationality_cards'),
-            'family_book' => $this->uploadDocument($data['family_book'], 'family_books'),
-            'birth_certificate' => $this->uploadDocument($data['birth_certificate'], 'birth_certificates'),
-            'degreee_certificate' => $this->uploadDocument($data['degreee_certificate'], 'degree_certificates'),
+            'professtional_photo' => $this->uploadDocument($data['professtional_photo'] ?? null, 'professtional_photos'),
+            'nationality_card' => $this->uploadDocument($data['nationality_card'] ?? null, 'nationality_cards'),
+            'family_book' => $this->uploadDocument($data['family_book'] ?? null, 'family_books'),
+            'birth_certificate' => $this->uploadDocument($data['birth_certificate'] ?? null, 'birth_certificates'),
+            'degreee_certificate' => $this->uploadDocument($data['degreee_certificate'] ?? null, 'degree_certificates'),
             'social_media' => $data['social_media'] ?? null,
         ];
+
+        Log::info('Personal information paths after upload', [
+            'user_id' => $userId,
+            'paths' => $personalInfoData
+        ]);
 
         return PersonalInformation::create($personalInfoData);
     }
@@ -141,18 +154,57 @@ class UserService
     private function uploadDocument(?UploadedFile $file, string $folder): ?string
     {
         if (!$file) {
+            Log::debug('No file provided for upload', ['folder' => $folder]);
             return null;
         }
 
-        // Store in storage/app/public/documents/{folder}
-        $path = $file->store("documents/{$folder}", 'public');
-
-        // Track uploaded file for potential cleanup
-        if ($path) {
-            $this->uploadedFiles[] = $path;
+        if (!$file->isValid()) {
+            Log::warning('Invalid file upload attempted', [
+                'folder' => $folder,
+                'error' => $file->getErrorMessage(),
+                'original_name' => $file->getClientOriginalName(),
+            ]);
+            return null;
         }
 
-        return $path;
+        Log::info('Attempting to upload file', [
+            'folder' => $folder,
+            'original_name' => $file->getClientOriginalName(),
+            'size' => $file->getSize(),
+            'mime_type' => $file->getMimeType(),
+        ]);
+
+        try {
+            // Store in storage/app/public/documents/{folder}
+            $path = $file->store("documents/{$folder}", 'public');
+
+            if ($path) {
+                $this->uploadedFiles[] = $path;
+                $fullPath = Storage::disk('public')->path($path);
+                $exists = Storage::disk('public')->exists($path);
+
+                Log::info('File uploaded successfully', [
+                    'path' => $path,
+                    'full_path' => $fullPath,
+                    'exists_after_upload' => $exists,
+                ]);
+            } else {
+                Log::error('File upload returned empty path', [
+                    'folder' => $folder,
+                    'original_name' => $file->getClientOriginalName(),
+                ]);
+            }
+
+            return $path;
+        } catch (\Throwable $e) {
+            Log::error('File upload failed with exception', [
+                'folder' => $folder,
+                'original_name' => $file->getClientOriginalName(),
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]);
+            throw $e;
+        }
     }
 
     /**
@@ -203,11 +255,11 @@ class UserService
             $search = $filters['search'];
             $query->where(function ($q) use ($search) {
                 $q->where('first_name', 'like', '%' . $search . '%')
-                  ->orWhere('last_name', 'like', '%' . $search . '%')
-                  ->orWhereHas('credential', function ($cq) use ($search) {
-                      $cq->where('email', 'like', '%' . $search . '%')
-                         ->orWhere('username', 'like', '%' . $search . '%');
-                  });
+                    ->orWhere('last_name', 'like', '%' . $search . '%')
+                    ->orWhereHas('credential', function ($cq) use ($search) {
+                        $cq->where('email', 'like', '%' . $search . '%')
+                            ->orWhere('username', 'like', '%' . $search . '%');
+                    });
             });
         }
 
@@ -245,6 +297,28 @@ class UserService
                     'email' => $user->credential->email,
                     'username' => $user->credential->username,
                     'phone_number' => $user->credential->phone_number,
+                    'emergency_contact' => $user->emergencyContact ? [
+                        'contact_first_name' => $user->emergencyContact->contact_first_name,
+                        'contact_last_name' => $user->emergencyContact->contact_last_name,
+                        'contact_full_name' => $user->emergencyContact->full_name,
+                        'contact_relationship' => $user->emergencyContact->contact_relationship,
+                        'contact_phone_number' => $user->emergencyContact->contact_phone_number,
+                        'contact_address' => $user->emergencyContact->contact_address,
+                        'contact_social_media' => $user->emergencyContact->contact_social_media,
+                    ] : null,
+                    'personal_information' => $user->personalInformation ? [
+                        'professtional_photo' => $user->personalInformation->professtional_photo,
+                        'professtional_photo_url' => $user->personalInformation->professtional_photo_url,
+                        'nationality_card' => $user->personalInformation->nationality_card,
+                        'nationality_card_url'=> $user->personalInformation->nationality_card_url,
+                        'family_book' => $user->personalInformation->family_book,
+                        'family_book_url' => $user->personalInformation->family_book_url,
+                        'birth_certificate' => $user->personalInformation->birth_certificate,
+                        'birth_certificate_url' => $user->personalInformation->birth_certificate_url,
+                        'degreee_certificate' => $user->personalInformation->degreee_certificate,
+                        'degree_certificate_url' => $user->personalInformation->degree_certificate_url,
+                        'social_media' => $user->personalInformation->social_media,
+                    ] : null,
                     'created_at' => $user->created_at->toIso8601String(),
                     'deleted_at' => $user->deleted_at?->toIso8601String(),
                 ];
