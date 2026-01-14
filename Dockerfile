@@ -40,27 +40,26 @@ RUN composer install --optimize-autoloader
 # Create keys directory and set permissions
 RUN mkdir -p storage/keys && chmod -R 775 storage bootstrap/cache
 
-# Create storage directories for volume mount
-RUN mkdir -p storage/app/public/documents
-
-# Create startup script - run setup tasks quickly, then start server
+# Create startup script
 RUN echo '#!/bin/bash\n\
 set -e\n\
 PORT=${PORT:-8000}\n\
-\n\
-# Quick setup (these are fast)\n\
-mkdir -p storage/app/public/documents\n\
-chmod -R 775 storage 2>/dev/null || true\n\
-php artisan storage:link --force 2>/dev/null || true\n\
-\n\
-# Run migrations (required before server)\n\
+# Set umask for new files\n\
+umask 0002\n\
+# Fix storage & bootstrap/cache ownership and permissions\n\
+echo "Fixing storage ownership and permissions..."\n\
+chown -R www-data:www-data storage bootstrap/cache\n\
+find storage -type d -exec chmod 775 {} \;\n\
+find storage -type f -exec chmod 664 {} \;\n\
+chmod -R 775 bootstrap/cache\n\
+# Ensure storage link exists\n\
+php artisan storage:link 2>/dev/null || true\n\
+echo "Running migrations..."\n\
 php artisan migrate --force\n\
-\n\
-# Run seeding and JWT generation in background\n\
-(php artisan db:seed --force 2>/dev/null || true) &\n\
-(php artisan jwt:generate-keys 2>/dev/null || true) &\n\
-\n\
-# Start server immediately\n\
+echo "Seeding database..."\n\
+php artisan db:seed --force\n\
+echo "Generating JWT keys..."\n\
+php artisan jwt:generate-keys\n\
 echo "Starting server on port $PORT..."\n\
 php artisan serve --host=0.0.0.0 --port=$PORT\n' > /usr/local/bin/start.sh && chmod +x /usr/local/bin/start.sh
 
