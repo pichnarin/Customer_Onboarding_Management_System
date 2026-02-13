@@ -23,7 +23,7 @@ class AdminCreateUserRequest extends FormRequest
             'address' => ['required', 'string', 'max:500'],
             'gender' => ['required', 'in:male,female,other'],
             'nationality' => ['required', 'string', 'max:100'],
-            'role' => ['required', 'string', 'in:admin,employee,trainee'],
+            'role' => ['required', 'string', 'in:admin,sale,trainer'],
 
             // Personal Information (images)
             'professtional_photo' => ['nullable', 'file', 'mimes:jpeg,jpg,png', 'max:5120'], // 5MB max

@@ -21,8 +21,8 @@ return new class extends Migration
         // Seed default roles
         DB::table('roles')->insert([
             ['id' => \Illuminate\Support\Str::uuid(), 'role' => 'admin', 'created_at' => now(), 'updated_at' => now()],
-            ['id' => \Illuminate\Support\Str::uuid(), 'role' => 'employee', 'created_at' => now(), 'updated_at' => now()],
-            ['id' => \Illuminate\Support\Str::uuid(), 'role' => 'trainee', 'created_at' => now(), 'updated_at' => now()],
+            ['id' => \Illuminate\Support\Str::uuid(), 'role' => 'sale', 'created_at' => now(), 'updated_at' => now()],
+            ['id' => \Illuminate\Support\Str::uuid(), 'role' => 'trainer', 'created_at' => now(), 'updated_at' => now()],
         ]);
     }
 

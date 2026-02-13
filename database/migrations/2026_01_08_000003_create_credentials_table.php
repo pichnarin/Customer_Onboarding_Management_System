@@ -29,6 +29,7 @@ return new class extends Migration
             // Indexes for login lookups
             $table->index('email');
             $table->index('username');
+            $table->index('phone_number');
             $table->index('user_id');
         });
     }

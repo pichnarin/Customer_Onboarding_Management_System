@@ -10,6 +10,7 @@ use App\Services\AuthService;
 use App\Services\UserService;
 use App\Services\JwtService;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\Log;
 
 class AuthController extends Controller
 {
