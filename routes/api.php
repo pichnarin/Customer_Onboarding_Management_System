@@ -4,14 +4,8 @@ use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\GoogleOAuthController;
 
-
-
-/*
-|--------------------------------------------------------------------------
-| Health Check Route
-|-------------------------------------------------------------------------
-*/
 Route::get('/health', function () {
     return response()->json([
         'status' => 'OK',
@@ -66,14 +60,6 @@ Route::get('/debug-db', function () {
     }
 });
 
-/*
-|--------------------------------------------------------------------------
-| API Routes
-|--------------------------------------------------------------------------
-*/
-
-
-// Public routes (no authentication required)
 Route::prefix('auth')->group(function () {
     Route::post('/register', [AuthController::class, 'register']);
     Route::post('/login', [AuthController::class, 'login']);
@@ -81,18 +67,19 @@ Route::prefix('auth')->group(function () {
     Route::post('/refresh-token', [AuthController::class, 'refreshToken']);
 });
 
-// Protected routes (JWT required)
+Route::get('/google/callback', [GoogleOAuthController::class, 'callback']);
+
 Route::middleware(['jwt.auth'])->group(function () {
 
-    // Logout
     Route::post('/auth/logout', [AuthController::class, 'logout']);
 
-    // User profile
     Route::get('/get-profile', [UserController::class, 'getProfile']);
 
-    // Admin-only routes (user management)
+    Route::get('/google/redirect', [GoogleOAuthController::class, 'redirect']);
+    Route::get('/google/status', [GoogleOAuthController::class, 'status']);
+    Route::delete('/google/disconnect', [GoogleOAuthController::class, 'disconnect']);
+
     Route::middleware(['admin.only'])->group(function () {
-        // User CRUD operations
         Route::get('/user-detail/{userId}', [UserController::class, 'getUserById']);
         Route::get('/get-users', [UserController::class, 'listUsers']);
         Route::post('/create-user', [UserController::class, 'createUser']);
