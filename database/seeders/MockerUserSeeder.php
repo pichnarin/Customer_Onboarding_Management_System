@@ -13,8 +13,6 @@ class MockerUserSeeder extends Seeder
 {
       public function run(): void
     {
-
-
         $roles = [
             'employee' => 'b45b3f6d-91c4-4e6d-8b41-2f0f52e1c222',
             'trainee'  => 'a2e4f8d9-0c35-4b6e-8d33-cc13a9c3c333',

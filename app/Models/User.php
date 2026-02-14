@@ -66,6 +66,11 @@ class User extends Authenticatable
         return $this->hasOne(EmergencyContact::class);
     }
 
+    public function oauthTokens(): HasMany
+    {
+        return $this->hasMany(OAuthToken::class);
+    }
+
     // Helper methods
     public function isAdmin(): bool
     {

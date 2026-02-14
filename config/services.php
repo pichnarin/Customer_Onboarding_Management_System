@@ -35,4 +35,11 @@ return [
         ],
     ],
 
+    'google' => [
+        'client_id' => env('GOOGLE_CLIENT_ID'),
+        'client_secret' => env('GOOGLE_CLIENT_SECRET'),
+        'redirect' => env('GOOGLE_REDIRECT_URI'),
+        'frontend_redirect_url' => env('GOOGLE_FRONTEND_REDIRECT_URL', 'http://localhost:5173/google/callback'),
+    ],
+
 ];
