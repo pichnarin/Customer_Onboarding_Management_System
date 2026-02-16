@@ -97,7 +97,7 @@ Check if the current user has a connected Google account.
 
 ---
 
-## `DELETE /api/google/disconnect`  
+## `DELETE /api/google/disconnect`
 
 Disconnect the user's Google account (soft-deletes the stored OAuth tokens).
 
