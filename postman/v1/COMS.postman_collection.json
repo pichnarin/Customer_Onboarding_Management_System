@@ -1,0 +1,1431 @@
+{
+	"info": {
+		"_postman_id": "coms-collection-v1",
+		"name": "COMS — Customer Onboarding Management System",
+		"description": "Complete API collection for COMS (CheckinMe). Covers authentication, user management, onboarding workflow, training assignments, sessions, and notifications.\n\n**Setup:**\n1. Select the `COMS - Local` environment.\n2. Run `2. Login` → `3. Verify OTP` — tokens are auto-saved.\n3. All protected requests use `{{access_token}}` automatically.\n\n**Seeded credentials:**\n- Admin: `admin` / `Admin@123456`\n- Sale: `sale_demo` / `Sale@123456`\n- Trainer: `trainer_demo` / `Trainer@123456`",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"variable": [],
+	"auth": {
+		"type": "bearer",
+		"bearer": [
+			{
+				"key": "token",
+				"value": "{{access_token}}",
+				"type": "string"
+			}
+		]
+	},
+	"item": [
+		{
+			"name": "Authentication",
+			"description": "Public endpoints — no token required except Logout.",
+			"item": [
+				{
+					"name": "1. Register User",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"first_name\": \"John\",\n  \"last_name\": \"Doe\",\n  \"dob\": \"1995-05-15\",\n  \"address\": \"123 Main Street, Phnom Penh\",\n  \"gender\": \"male\",\n  \"nationality\": \"Cambodian\",\n  \"email\": \"john.doe@example.com\",\n  \"username\": \"johndoe\",\n  \"phone_number\": \"+85512345678\",\n  \"password\": \"John@123456\",\n  \"password_confirmation\": \"John@123456\",\n  \"role\": \"sale\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/auth/register",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"auth",
+								"register"
+							]
+						},
+						"description": "Register a new user. OTP is sent to the provided email.\n\n**Roles allowed:** `admin`, `sale`, `trainer`"
+					},
+					"response": []
+				},
+				{
+					"name": "2. Login (Get OTP)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 200) {",
+									"    const res = pm.response.json();",
+									"    if (res.data && res.data.email) {",
+									"        pm.environment.set('user_email', res.data.email);",
+									"    }",
+									"    console.log('OTP sent — check application logs or email.');",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"identifier\": \"admin\",\n  \"password\": \"Admin@123456\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/auth/login",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"auth",
+								"login"
+							]
+						},
+						"description": "Step 1 of 2FA login. Sends OTP to the user's registered email.\n\n**Seeded accounts:**\n- Admin: `admin` / `Admin@123456`\n- Sale: `sale_demo` / `Sale@123456`\n- Trainer: `trainer_demo` / `Trainer@123456`\n\n**Get OTP from logs:** `php artisan pail | grep OTP`"
+					},
+					"response": []
+				},
+				{
+					"name": "3. Verify OTP (Get Tokens)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 200) {",
+									"    const res = pm.response.json();",
+									"    if (res.data) {",
+									"        pm.environment.set('access_token', res.data.access_token);",
+									"        pm.environment.set('refresh_token', res.data.refresh_token);",
+									"        console.log('Tokens saved to environment.');",
+									"    }",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"identifier\": \"admin\",\n  \"otp\": \"1234\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/auth/verify-otp",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"auth",
+								"verify-otp"
+							]
+						},
+						"description": "Step 2 of 2FA. Verifies OTP and returns JWT access + refresh tokens.\n\n**Replace `1234`** with the actual OTP from the email/logs.\n\n**Auto-saves:** `access_token` and `refresh_token` to environment."
+					},
+					"response": []
+				},
+				{
+					"name": "4. Refresh Token",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 200) {",
+									"    const res = pm.response.json();",
+									"    if (res.data && res.data.access_token) {",
+									"        pm.environment.set('access_token', res.data.access_token);",
+									"        console.log('Access token refreshed.');",
+									"    }",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"refresh_token\": \"{{refresh_token}}\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/auth/refresh-token",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"auth",
+								"refresh-token"
+							]
+						},
+						"description": "Use the refresh token to obtain a new access token without re-authenticating.\n\n**Auto-saves:** New `access_token` to environment."
+					},
+					"response": []
+				},
+				{
+					"name": "5. Logout",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"refresh_token\": \"{{refresh_token}}\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/auth/logout",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"auth",
+								"logout"
+							]
+						},
+						"description": "Revokes the refresh token and invalidates the current session.\n\n**Requires:** Bearer token."
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "User Management",
+			"description": "Profile and admin-only user CRUD. Admin routes require `admin` role.",
+			"item": [
+				{
+					"name": "Get My Profile",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/get-profile",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"get-profile"
+							]
+						},
+						"description": "Returns the authenticated user's full profile including role, credentials, and personal information."
+					},
+					"response": []
+				},
+				{
+					"name": "List Users (Admin)",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/get-users?role=trainer&per_page=10&page=1",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"get-users"
+							],
+							"query": [
+								{
+									"key": "role",
+									"value": "trainer",
+									"description": "Filter by role: admin | sale | trainer | customer"
+								},
+								{
+									"key": "gender",
+									"value": "",
+									"description": "Filter by gender: male | female | other",
+									"disabled": true
+								},
+								{
+									"key": "is_suspended",
+									"value": "",
+									"description": "Filter by suspension: true | false",
+									"disabled": true
+								},
+								{
+									"key": "nationality",
+									"value": "",
+									"description": "Filter by nationality",
+									"disabled": true
+								},
+								{
+									"key": "search",
+									"value": "",
+									"description": "Search by name / email / username",
+									"disabled": true
+								},
+								{
+									"key": "with_trashed",
+									"value": "",
+									"description": "Include soft-deleted users: true",
+									"disabled": true
+								},
+								{
+									"key": "only_trashed",
+									"value": "",
+									"description": "Only soft-deleted users: true",
+									"disabled": true
+								},
+								{
+									"key": "sort_by",
+									"value": "created_at",
+									"description": "Sort column",
+									"disabled": true
+								},
+								{
+									"key": "sort_order",
+									"value": "desc",
+									"description": "asc | desc",
+									"disabled": true
+								},
+								{
+									"key": "per_page",
+									"value": "10"
+								},
+								{
+									"key": "page",
+									"value": "1"
+								}
+							]
+						},
+						"description": "Paginated list of all users with optional filters.\n\n**Requires:** Admin role."
+					},
+					"response": []
+				},
+				{
+					"name": "Get User by ID (Admin)",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/user-detail/{{user_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"user-detail",
+								"{{user_id}}"
+							]
+						},
+						"description": "Retrieve full details for a specific user.\n\n**Requires:** Admin role."
+					},
+					"response": []
+				},
+				{
+					"name": "Create User (Admin)",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "first_name",
+									"value": "Jane",
+									"type": "text"
+								},
+								{
+									"key": "last_name",
+									"value": "Smith",
+									"type": "text"
+								},
+								{
+									"key": "dob",
+									"value": "1993-08-20",
+									"type": "text"
+								},
+								{
+									"key": "address",
+									"value": "55 Trainer Street, Phnom Penh",
+									"type": "text"
+								},
+								{
+									"key": "gender",
+									"value": "female",
+									"type": "text",
+									"description": "male | female | other"
+								},
+								{
+									"key": "nationality",
+									"value": "Cambodian",
+									"type": "text"
+								},
+								{
+									"key": "role",
+									"value": "trainer",
+									"type": "text",
+									"description": "admin | sale | trainer"
+								},
+								{
+									"key": "email",
+									"value": "jane.smith@checkinme.com",
+									"type": "text"
+								},
+								{
+									"key": "username",
+									"value": "jane_smith",
+									"type": "text"
+								},
+								{
+									"key": "phone_number",
+									"value": "+85512345679",
+									"type": "text"
+								},
+								{
+									"key": "password",
+									"value": "Jane@123456",
+									"type": "text"
+								},
+								{
+									"key": "password_confirmation",
+									"value": "Jane@123456",
+									"type": "text"
+								},
+								{
+									"key": "contact_first_name",
+									"value": "Bob",
+									"type": "text"
+								},
+								{
+									"key": "contact_last_name",
+									"value": "Smith",
+									"type": "text"
+								},
+								{
+									"key": "contact_relationship",
+									"value": "Spouse",
+									"type": "text"
+								},
+								{
+									"key": "contact_phone_number",
+									"value": "+85598765432",
+									"type": "text"
+								},
+								{
+									"key": "contact_address",
+									"value": "55 Trainer Street, Phnom Penh",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{base_url}}/create-user",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"create-user"
+							]
+						},
+						"description": "Create a new internal user (admin/sale/trainer). Uses multipart/form-data to support optional file uploads.\n\n**Requires:** Admin role."
+					},
+					"response": []
+				},
+				{
+					"name": "Update User (Admin)",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "first_name",
+									"value": "Jane",
+									"type": "text"
+								},
+								{
+									"key": "last_name",
+									"value": "Updated",
+									"type": "text"
+								},
+								{
+									"key": "address",
+									"value": "99 New Street, Phnom Penh",
+									"type": "text"
+								},
+								{
+									"key": "nationality",
+									"value": "Cambodian",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{base_url}}/update-user-information/{{user_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"update-user-information",
+								"{{user_id}}"
+							]
+						},
+						"description": "Update user profile and personal information.\n\n**Requires:** Admin role."
+					},
+					"response": []
+				},
+				{
+					"name": "Soft Delete User (Admin)",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/soft-delete-user/{{user_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"soft-delete-user",
+								"{{user_id}}"
+							]
+						},
+						"description": "Soft-delete a user (reversible).\n\n**Requires:** Admin role."
+					},
+					"response": []
+				},
+				{
+					"name": "Restore User (Admin)",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/restore-user/{{user_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"restore-user",
+								"{{user_id}}"
+							]
+						},
+						"description": "Restore a soft-deleted user.\n\n**Requires:** Admin role."
+					},
+					"response": []
+				},
+				{
+					"name": "Hard Delete User (Admin)",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/hard-delete-user/{{user_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"hard-delete-user",
+								"{{user_id}}"
+							]
+						},
+						"description": "Permanently delete a user and all associated files. **Irreversible.**\n\n**Requires:** Admin role."
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "📋 Onboarding Requests",
+			"description": "Create and manage onboarding requests. Accessible by `admin` and `sale` roles.\n\n**Status flow:** `pending → assigned → in_progress → completed` | any → `cancelled`",
+			"item": [
+				{
+					"name": "Create Onboarding Request",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 201) {",
+									"    const res = pm.response.json();",
+									"    if (res.data && res.data.id) {",
+									"        pm.environment.set('request_id', res.data.id);",
+									"        console.log('request_id saved: ' + res.data.id);",
+									"        console.log('Request code: ' + res.data.request_code);",
+									"    }",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"client_id\": \"{{client_id}}\",\n  \"system_id\": \"{{system_id}}\",\n  \"priority\": \"high\",\n  \"notes\": \"Client needs onboarding for COMS platform. Priority due to contract start date.\",\n  \"expected_start_date\": \"2026-03-01\",\n  \"expected_end_date\": \"2026-04-30\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/onboarding/requests",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"onboarding",
+								"requests"
+							]
+						},
+						"description": "Create a new onboarding request for a client.\n\n**priority:** `low` | `medium` | `high` | `urgent`\n\n**Auto-saves:** `request_id` to environment.\n\n**Requires:** `sale` or `admin` role."
+					},
+					"response": []
+				},
+				{
+					"name": "List Onboarding Requests",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/onboarding/requests",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"onboarding",
+								"requests"
+							],
+							"query": [
+								{
+									"key": "status",
+									"value": "pending",
+									"description": "pending | assigned | in_progress | completed | cancelled",
+									"disabled": true
+								},
+								{
+									"key": "priority",
+									"value": "high",
+									"description": "low | medium | high | urgent",
+									"disabled": true
+								}
+							]
+						},
+						"description": "List onboarding requests. Sale users only see their own requests; admins see all.\n\n**Optional filters:** `status`, `priority`"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Onboarding Request",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/onboarding/requests/{{request_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"onboarding",
+								"requests",
+								"{{request_id}}"
+							]
+						},
+						"description": "Get full details of a single onboarding request including client, system, and assignments."
+					},
+					"response": []
+				},
+				{
+					"name": "Assign Trainer",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 200) {",
+									"    const res = pm.response.json();",
+									"    if (res.data && res.data.assignment_id) {",
+									"        pm.environment.set('assignment_id', res.data.assignment_id);",
+									"        console.log('assignment_id saved: ' + res.data.assignment_id);",
+									"    }",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"trainer_id\": \"{{trainer_id}}\",\n  \"notes\": \"Please prioritise initial setup and basic training sessions first.\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/onboarding/requests/{{request_id}}/assign-trainer",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"onboarding",
+								"requests",
+								"{{request_id}}",
+								"assign-trainer"
+							]
+						},
+						"description": "Assign a trainer to an onboarding request. Creates a `TrainingAssignment` and bulk-inserts stage progress rows.\n\n**Transitions:** Request `pending → assigned`\n\n**Notifies:** Trainer (`assignment_created`)\n\n**Auto-saves:** `assignment_id`\n\n**Requires:** `sale` or `admin` role."
+					},
+					"response": []
+				},
+				{
+					"name": "Cancel Onboarding Request",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"reason\": \"Client decided to postpone onboarding due to internal restructuring.\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/onboarding/requests/{{request_id}}/cancel",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"onboarding",
+								"requests",
+								"{{request_id}}",
+								"cancel"
+							]
+						},
+						"description": "Cancel a request and cascade:\n1. All scheduled sessions → `cancelled`\n2. Invited/confirmed attendees → `cancelled`\n3. Active assignment → `completed` (early termination)\n4. Request → `cancelled`\n\n**Notifies:** Trainer\n\n**Requires:** `sale` or `admin` role."
+					},
+					"response": []
+				},
+				{
+					"name": "Onboarding Dashboard",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/onboarding/dashboard",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"onboarding",
+								"dashboard"
+							]
+						},
+						"description": "Dashboard summary of all onboarding requests with nested assignment/session counts and overall progress percentages.\n\n**Sale** sees only their own requests. **Admin** sees all."
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Assignments",
+			"description": "Trainer actions on training assignments.\n\n**Status flow:** `assigned → accepted → in_progress → completed` | `assigned → rejected`",
+			"item": [
+				{
+					"name": "List My Assignments",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/assignments",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"assignments"
+							]
+						},
+						"description": "Returns all training assignments for the authenticated trainer."
+					},
+					"response": []
+				},
+				{
+					"name": "Get Assignment",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/assignments/{{assignment_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"assignments",
+								"{{assignment_id}}"
+							]
+						},
+						"description": "Full details for one assignment including stage progress, sessions, and client info."
+					},
+					"response": []
+				},
+				{
+					"name": "Accept Assignment",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/assignments/{{assignment_id}}/accept",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"assignments",
+								"{{assignment_id}}",
+								"accept"
+							]
+						},
+						"description": "Trainer accepts the assignment.\n\n**Transitions:** `assigned → accepted`\n\n**Notifies:** Sale (`assignment_accepted`)\n\n**Requires:** Trainer role."
+					},
+					"response": []
+				},
+				{
+					"name": "Reject Assignment",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"rejection_reason\": \"Unavailable during the requested period due to prior commitments.\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/assignments/{{assignment_id}}/reject",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"assignments",
+								"{{assignment_id}}",
+								"reject"
+							]
+						},
+						"description": "Trainer rejects the assignment.\n\n**Transitions:** Assignment `assigned → rejected`, Request reverts to `pending`\n\n**Notifies:** Sale (`assignment_rejected`)\n\n**Requires:** Trainer role."
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Training Sessions",
+			"description": "Create and manage training sessions within an accepted assignment.\n\n**Status flow:** `scheduled → in_progress → completed` | `scheduled → cancelled` | `scheduled → rescheduled`",
+			"item": [
+				{
+					"name": "Create Session",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 201) {",
+									"    const res = pm.response.json();",
+									"    if (res.data && res.data.session_id) {",
+									"        pm.environment.set('session_id', res.data.session_id);",
+									"        console.log('session_id saved: ' + res.data.session_id);",
+									"    }",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"stage_id\": \"{{stage_id}}\",\n  \"session_title\": \"Initial Setup — Environment Configuration\",\n  \"session_description\": \"Walk through server setup, DNS configuration, and initial COMS installation.\",\n  \"scheduled_date\": \"2026-03-05\",\n  \"scheduled_start_time\": \"09:00\",\n  \"scheduled_end_time\": \"11:00\",\n  \"location_type\": \"online\",\n  \"meeting_link\": \"https://meet.google.com/abc-defg-hij\",\n  \"physical_location\": null,\n  \"contact_ids\": []\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/assignments/{{assignment_id}}/sessions",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"assignments",
+								"{{assignment_id}}",
+								"sessions"
+							]
+						},
+						"description": "Create a training session for an assignment. Bulk-inserts `session_attendees` as `invited` for all provided contact IDs. Sends Telegram notifications if contacts have `telegram_chat_id`.\n\n**location_type:** `online` | `onsite` | `hybrid`\n\n**Auto-saves:** `session_id`\n\n**Requires:** Trainer or Admin role."
+					},
+					"response": []
+				},
+				{
+					"name": "List Sessions for Assignment",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/assignments/{{assignment_id}}/sessions",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"assignments",
+								"{{assignment_id}}",
+								"sessions"
+							]
+						},
+						"description": "List all training sessions for a given assignment, ordered by date and start time."
+					},
+					"response": []
+				},
+				{
+					"name": "Start Session",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/sessions/{{session_id}}/start",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"sessions",
+								"{{session_id}}",
+								"start"
+							]
+						},
+						"description": "Mark a session as started.\n\n**Transitions:**\n- Session: `scheduled → in_progress`\n- If first session: Assignment `accepted → in_progress`, Request `assigned → in_progress`\n- Stage progress: `not_started → in_progress`\n\n**Requires:** Trainer or Admin role."
+					},
+					"response": []
+				},
+				{
+					"name": "Complete Session",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"completion_notes\": \"All topics covered successfully. Client team configured the environment independently by end of session. Follow-up scheduled for next week.\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/sessions/{{session_id}}/complete",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"sessions",
+								"{{session_id}}",
+								"complete"
+							]
+						},
+						"description": "Complete a session and trigger cascade logic:\n1. Session: `in_progress → completed`\n2. Updates `stage_progress.progress_percentage`\n3. If all sessions in stage done → stage `completed`\n4. If all stages done → assignment + request `completed`\n\n**Notifies:** Sale (`session_completed`)\n\n**Requires:** Trainer or Admin role."
+					},
+					"response": []
+				},
+				{
+					"name": "Reschedule Session",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 200) {",
+									"    const res = pm.response.json();",
+									"    if (res.data && res.data.new_session_id) {",
+									"        pm.environment.set('session_id', res.data.new_session_id);",
+									"        console.log('session_id updated to new session: ' + res.data.new_session_id);",
+									"    }",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"scheduled_date\": \"2026-03-12\",\n  \"scheduled_start_time\": \"10:00\",\n  \"scheduled_end_time\": \"12:00\",\n  \"meeting_link\": \"https://meet.google.com/xyz-newl-ink1\",\n  \"physical_location\": null\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/sessions/{{session_id}}/reschedule",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"sessions",
+								"{{session_id}}",
+								"reschedule"
+							]
+						},
+						"description": "Reschedule a session. Old session → `rescheduled`. A new cloned session is created with the new date/time and all attendees re-invited.\n\n**Sends Telegram:** `session_rescheduled` to all contacts.\n\n**Auto-updates:** `session_id` to the new session.\n\n**Requires:** Trainer or Admin role."
+					},
+					"response": []
+				},
+				{
+					"name": "Cancel Session",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/sessions/{{session_id}}/cancel",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"sessions",
+								"{{session_id}}",
+								"cancel"
+							]
+						},
+						"description": "Cancel a scheduled or in-progress session. All invited/confirmed attendees are also cancelled.\n\n**Sends Telegram:** `session_cancelled`\n\n**Requires:** Trainer or Admin role."
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Attendance",
+			"description": "Mark attendance for session attendees.\n\n**Status flow:** `invited → confirmed → attended` | `invited/confirmed → absent` | `invited/confirmed → cancelled`",
+			"item": [
+				{
+					"name": "Mark Attendance",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"attendance_status\": \"attended\",\n  \"notes\": \"Attended the full session and completed all exercises.\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/sessions/{{session_id}}/attendees/{{attendee_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"sessions",
+								"{{session_id}}",
+								"attendees",
+								"{{attendee_id}}"
+							]
+						},
+						"description": "Update attendance status for a specific attendee.\n\n**attendance_status:** `attended` | `absent`\n\nSetting `attended` also records `attended_at` timestamp.\n\n**Requires:** Trainer or Admin role."
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Stage Progress",
+			"description": "Manage training stage progress within an assignment.\n\n**Status flow:** `not_started → in_progress → completed` | any → `skipped`",
+			"item": [
+				{
+					"name": "Skip Stage",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"notes\": \"Client team already completed this stage with previous vendor. Mutually agreed to skip.\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/stage-progress/{{stage_progress_id}}/skip",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"stage-progress",
+								"{{stage_progress_id}}",
+								"skip"
+							]
+						},
+						"description": "Skip a training stage. If all remaining stages are now completed or skipped, cascades assignment and request to `completed`.\n\n**Requires:** Trainer or Admin role."
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Dashboards",
+			"description": "Role-specific dashboard summaries.",
+			"item": [
+				{
+					"name": "Onboarding Dashboard (Sale/Admin)",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/onboarding/dashboard",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"onboarding",
+								"dashboard"
+							]
+						},
+						"description": "Returns all onboarding requests with nested progress. Sale sees own requests only."
+					},
+					"response": []
+				},
+				{
+					"name": "Trainer Dashboard",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/trainer/dashboard",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"trainer",
+								"dashboard"
+							]
+						},
+						"description": "Returns trainer's assignments with overall progress percentage and next upcoming session.\n\n**Requires:** Trainer role (or Admin)."
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Notifications",
+			"description": "In-app notification management for authenticated users.",
+			"item": [
+				{
+					"name": "Get Recent Notifications",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/notifications?limit=20",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"notifications"
+							],
+							"query": [
+								{
+									"key": "limit",
+									"value": "20",
+									"description": "Number of notifications to return (default: 20)"
+								}
+							]
+						},
+						"description": "Returns recent notifications for the authenticated user, newest first.\n\n**Optional:** `limit` query param (default 20)."
+					},
+					"response": []
+				},
+				{
+					"name": "Get Unread Count",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/notifications/unread-count",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"notifications",
+								"unread-count"
+							]
+						},
+						"description": "Returns the count of unread notifications for the authenticated user. Use for badge display."
+					},
+					"response": []
+				},
+				{
+					"name": "Mark Notification as Read",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/notifications/{{notification_id}}/read",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"notifications",
+								"{{notification_id}}",
+								"read"
+							]
+						},
+						"description": "Mark a single notification as read.\n\n**Set** `notification_id` in the environment before calling."
+					},
+					"response": []
+				},
+				{
+					"name": "Mark All Notifications as Read",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/notifications/read-all",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"notifications",
+								"read-all"
+							]
+						},
+						"description": "Marks all unread notifications for the authenticated user as read. Returns the count of updated notifications."
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Google OAuth",
+			"description": "Google OAuth2 flow for linking a Google account to an existing COMS user.",
+			"item": [
+				{
+					"name": "Get Google Redirect URL",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/google/redirect",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"google",
+								"redirect"
+							]
+						},
+						"description": "Returns the Google OAuth redirect URL. Open this URL in a browser to begin the OAuth flow."
+					},
+					"response": []
+				},
+				{
+					"name": "Google OAuth Status",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/google/status",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"google",
+								"status"
+							]
+						},
+						"description": "Check whether the authenticated user has a linked Google account."
+					},
+					"response": []
+				},
+				{
+					"name": "Disconnect Google Account",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/google/disconnect",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"google",
+								"disconnect"
+							]
+						},
+						"description": "Unlink the Google account from the authenticated user."
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "System",
+			"description": "Health check and debug endpoints. No authentication required.",
+			"item": [
+				{
+					"name": "Health Check",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/health",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"health"
+							]
+						},
+						"description": "Returns `{status: OK}` if the API is running."
+					},
+					"response": []
+				},
+				{
+					"name": "Debug DB Connection",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/debug-db",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"debug-db"
+							]
+						},
+						"description": "Returns database connection details, driver info, and row counts. For development use only."
+					},
+					"response": []
+				}
+			]
+		}
+	]
+}

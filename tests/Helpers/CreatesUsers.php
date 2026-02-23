@@ -2,9 +2,9 @@
 
 namespace Tests\Helpers;
 
-use App\Models\User;
 use App\Models\Credential;
 use App\Models\Role;
+use App\Models\User;
 
 trait CreatesUsers
 {
@@ -16,7 +16,7 @@ trait CreatesUsers
         $roleName = $userData['role'] ?? 'user';
         $role = Role::where('role', $roleName)->first();
 
-        if (!$role) {
+        if (! $role) {
             $role = Role::factory()->create(['role' => $roleName]);
         }
 

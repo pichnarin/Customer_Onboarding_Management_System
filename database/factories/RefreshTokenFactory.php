@@ -20,7 +20,7 @@ class RefreshTokenFactory extends Factory
     {
         return [
             'user_id' => User::factory(),
-            'token' => 'test_refresh_token_' . fake()->uuid(),
+            'token' => 'test_refresh_token_'.fake()->uuid(),
             'expires_at' => Carbon::now()->addDays(30),
             'is_revoked' => false,
         ];

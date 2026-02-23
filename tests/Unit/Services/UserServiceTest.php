@@ -2,16 +2,14 @@
 
 namespace Tests\Unit\Services;
 
-use Tests\TestCase;
-use App\Services\UserService;
-use App\Services\OtpService;
-use App\Models\User;
-use App\Models\Role;
-use App\Models\Credential;
 use App\Exceptions\RoleNotFoundException;
 use App\Exceptions\UserNotFoundException;
+use App\Models\Role;
+use App\Models\User;
+use App\Services\UserService;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
+use Tests\TestCase;
 
 class UserServiceTest extends TestCase
 {

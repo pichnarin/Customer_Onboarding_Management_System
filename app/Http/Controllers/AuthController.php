@@ -2,15 +2,14 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\RegisterRequest;
 use App\Http\Requests\LoginRequest;
-use App\Http\Requests\VerifyOtpRequest;
 use App\Http\Requests\RefreshTokenRequest;
+use App\Http\Requests\RegisterRequest;
+use App\Http\Requests\VerifyOtpRequest;
 use App\Services\AuthService;
-use App\Services\UserService;
 use App\Services\JwtService;
+use App\Services\UserService;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Support\Facades\Log;
 
 class AuthController extends Controller
 {
@@ -26,14 +25,14 @@ class AuthController extends Controller
     public function register(RegisterRequest $request): JsonResponse
     {
         $userData = $request->only([
-            'first_name', 'last_name', 'dob', 'address', 'gender', 'nationality'
+            'first_name', 'last_name', 'dob', 'address', 'gender', 'nationality',
         ]);
 
         // Public registration always creates regular users
         $userData['role'] = 'user';
 
         $credentialData = $request->only([
-            'email', 'username', 'phone_number', 'password'
+            'email', 'username', 'phone_number', 'password',
         ]);
 
         $user = $this->userService->createUser($userData, $credentialData);
@@ -44,7 +43,7 @@ class AuthController extends Controller
             'data' => [
                 'user_id' => $user->id,
                 'email' => $user->credential->email,
-            ]
+            ],
         ], 201);
     }
 
@@ -63,8 +62,8 @@ class AuthController extends Controller
             'message' => 'OTP sent to your email',
             'data' => [
                 'email' => $credential->email,
-                'next_step' => 'verify_otp'
-            ]
+                'next_step' => 'verify_otp',
+            ],
         ]);
     }
 
@@ -81,7 +80,7 @@ class AuthController extends Controller
         return response()->json([
             'success' => true,
             'message' => 'Login successful',
-            'data' => $tokens
+            'data' => $tokens,
         ]);
     }
 
@@ -95,7 +94,7 @@ class AuthController extends Controller
         return response()->json([
             'success' => true,
             'message' => 'Token refreshed successfully',
-            'data' => $tokens
+            'data' => $tokens,
         ]);
     }
 
@@ -108,7 +107,7 @@ class AuthController extends Controller
 
         return response()->json([
             'success' => true,
-            'message' => 'Logged out successfully'
+            'message' => 'Logged out successfully',
         ]);
     }
 }

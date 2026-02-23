@@ -2,18 +2,18 @@
 
 namespace Tests;
 
-use Illuminate\Foundation\Testing\TestCase as BaseTestCase;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Foundation\Testing\TestCase as BaseTestCase;
 use Tests\Helpers\CreatesUsers;
 use Tests\Helpers\GeneratesTokens;
 use Tests\Helpers\HandlesOtp;
 
 abstract class TestCase extends BaseTestCase
 {
-    use RefreshDatabase;
     use CreatesUsers;
     use GeneratesTokens;
     use HandlesOtp;
+    use RefreshDatabase;
 
     protected function setUp(): void
     {
@@ -34,7 +34,7 @@ abstract class TestCase extends BaseTestCase
         $privateKeyPath = storage_path('keys/jwt_private.pem');
         $publicKeyPath = storage_path('keys/jwt_public.pem');
 
-        if (!file_exists($privateKeyPath) || !file_exists($publicKeyPath)) {
+        if (! file_exists($privateKeyPath) || ! file_exists($publicKeyPath)) {
             $this->artisan('jwt:generate-keys');
         }
     }

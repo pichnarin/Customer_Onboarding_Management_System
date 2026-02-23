@@ -9,8 +9,11 @@ use Throwable;
 abstract class BaseException extends Exception
 {
     protected int $httpStatusCode = 500;
+
     protected string $logLevel = 'error';
+
     protected bool $shouldLog = true;
+
     protected array $context = [];
 
     public function __construct(

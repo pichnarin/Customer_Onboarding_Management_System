@@ -8,7 +8,7 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::create('oauth_tokens', function(Blueprint $table){
+        Schema::create('oauth_tokens', function (Blueprint $table) {
             $table->uuid('id')->primary();
             $table->uuid('user_id');
             $table->string('provider', 50);
@@ -21,9 +21,9 @@ return new class extends Migration
             $table->softDeletes();
 
             $table->foreign('user_id')
-            ->references('id')
-            ->on('users')
-            ->onDelete('cascade');
+                ->references('id')
+                ->on('users')
+                ->onDelete('cascade');
 
             $table->index(['user_id', 'provider']);
         });
@@ -34,4 +34,3 @@ return new class extends Migration
         Schema::dropIfExists('oauth_tokens');
     }
 };
-

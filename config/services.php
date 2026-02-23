@@ -42,4 +42,8 @@ return [
         'frontend_redirect_url' => env('GOOGLE_FRONTEND_REDIRECT_URL', 'http://localhost:5173/google/callback'),
     ],
 
+    'telegram' => [
+        'bot_token' => env('TELEGRAM_BOT_TOKEN'),
+    ],
+
 ];

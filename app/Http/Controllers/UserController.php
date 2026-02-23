@@ -24,20 +24,20 @@ class UserController extends Controller
 
         return response()->json([
             'success' => true,
-            'data' => $profile
+            'data' => $profile,
         ]);
     }
 
     /**
      * Get user by Id
      */
-    public function getUserById(String $userId): JsonResponse
+    public function getUserById(string $userId): JsonResponse
     {
         $user = $this->userService->getUserProfile($userId);
 
         return response()->json([
             'success' => true,
-            'data' => $user
+            'data' => $user,
         ]);
     }
 
@@ -49,7 +49,7 @@ class UserController extends Controller
         $filters = $request->only([
             'role', 'gender', 'is_suspended', 'nationality', 'search',
             'with_trashed', 'only_trashed', 'sort_by', 'sort_order',
-            'per_page', 'page'
+            'per_page', 'page',
         ]);
 
         $result = $this->userService->listUsers($filters);
@@ -57,9 +57,37 @@ class UserController extends Controller
         return response()->json([
             'success' => true,
             'data' => $result['data'],
-            'pagination' => $result['pagination']
+            'pagination' => $result['pagination'],
         ]);
     }
+
+
+    public function listClients(Request $request): JsonResponse
+    {
+        $filters = $request->only(['search', 'limit']);
+
+        $clients = $this->userService->listClients($filters);
+
+        return response()->json([
+            'success' => true,
+            'data' => $clients,
+        ]);
+    }
+
+    public function listTrainers(Request $request): JsonResponse
+    {
+        $filters = $request->only([
+            'search', 'sort_by', 'sort_order', 'limit',
+        ]);
+
+        $trainers = $this->userService->listTrainers($filters);
+
+        return response()->json([
+        'success' => true,
+            'data' => $trainers,
+        ]);
+    }
+
 
     /**
      * Create new user (admin only - can create users with any role)
@@ -67,11 +95,11 @@ class UserController extends Controller
     public function createUser(AdminCreateUserRequest $request): JsonResponse
     {
         $userData = $request->only([
-            'first_name', 'last_name', 'dob', 'address', 'gender', 'nationality', 'role'
+            'first_name', 'last_name', 'dob', 'address', 'gender', 'nationality', 'role',
         ]);
 
         $credentialData = $request->only([
-            'email', 'username', 'phone_number', 'password'
+            'email', 'username', 'phone_number', 'password',
         ]);
 
         $personalInfoData = [
@@ -105,7 +133,7 @@ class UserController extends Controller
             'data' => [
                 'user_id' => $user->id,
                 'email' => $user->credential->email,
-            ]
+            ],
         ], 201);
     }
 
@@ -148,7 +176,7 @@ class UserController extends Controller
             'data' => [
                 'user_id' => $user->id,
                 'email' => $user->credential->email,
-            ]
+            ],
         ]);
     }
 
@@ -158,7 +186,7 @@ class UserController extends Controller
     public function updateUserInformation(UpdateUserInformationRequest $request, string $userId): JsonResponse
     {
         $userData = $request->only([
-            'first_name', 'last_name', 'dob', 'address', 'gender', 'nationality'
+            'first_name', 'last_name', 'dob', 'address', 'gender', 'nationality',
         ]);
 
         $personalInfoData = [];
@@ -183,7 +211,7 @@ class UserController extends Controller
 
             $emergencyContactData = $request->only([
                 'contact_first_name', 'contact_last_name', 'contact_relationship',
-                'contact_phone_number', 'contact_address', 'contact_social_media'
+                'contact_phone_number', 'contact_address', 'contact_social_media',
             ]);
         }
 
@@ -199,7 +227,7 @@ class UserController extends Controller
             'message' => 'User information updated successfully',
             'data' => [
                 'user_id' => $user->id,
-            ]
+            ],
         ]);
     }
 }

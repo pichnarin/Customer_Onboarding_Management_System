@@ -42,14 +42,14 @@ class GoogleOAuthController extends Controller
         try {
             $this->googleOAuthService->handleCallback($request->code, $userId);
 
-            return redirect()->to($frontendUrl . '?google=connected');
+            return redirect()->to($frontendUrl.'?google=connected');
         } catch (\Exception $e) {
             Log::error('Google OAuth callback failed', [
                 'error' => $e->getMessage(),
                 'user_id' => $userId,
             ]);
 
-            return redirect()->to($frontendUrl . '?google=failed&error=' . urlencode($e->getMessage()));
+            return redirect()->to($frontendUrl.'?google=failed&error='.urlencode($e->getMessage()));
         }
     }
 

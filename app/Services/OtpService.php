@@ -2,18 +2,20 @@
 
 namespace App\Services;
 
-use App\Models\Credential;
-use App\Mail\OtpMail;
 use App\Exceptions\MailDeliveryException;
 use App\Exceptions\OtpRateLimitException;
+use App\Mail\OtpMail;
+use App\Models\Credential;
 use Carbon\Carbon;
-use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
 
 class OtpService
 {
     private int $otpLength;
+
     private int $otpExpiryMin;
+
     private int $otpExpiryMax;
 
     public function __construct()
@@ -66,7 +68,7 @@ class OtpService
 
             // Rollback OTP on mail failure
             $credential->clearOtp();
-            throw new MailDeliveryException('Failed to send OTP email: ' . $e->getMessage(), 0, $e);
+            throw new MailDeliveryException('Failed to send OTP email: '.$e->getMessage(), 0, $e);
         }
     }
 
@@ -75,7 +77,7 @@ class OtpService
      */
     public function verifyOtp(Credential $credential, string $otp): bool
     {
-        if (!$credential->hasValidOtp($otp)) {
+        if (! $credential->hasValidOtp($otp)) {
             return false;
         }
 
@@ -91,7 +93,7 @@ class OtpService
      */
     public function canResendOtp(Credential $credential): bool
     {
-        if (!$credential->otp_expiry) {
+        if (! $credential->otp_expiry) {
             return true;
         }
 
@@ -100,7 +102,7 @@ class OtpService
         $canResend = Carbon::now()->greaterThan($credential->otp_expiry) ||
                      $credential->updated_at->lessThan($oneMinuteAgo);
 
-        if (!$canResend) {
+        if (! $canResend) {
             throw new OtpRateLimitException('Please wait at least 1 minute before requesting another OTP');
         }
 
