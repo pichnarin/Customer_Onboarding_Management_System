@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\File;
 class GenerateJwtKeys extends Command
 {
     protected $signature = 'jwt:generate-keys {--force : Force regeneration of keys}';
+
     protected $description = 'Generate RSA key pair for JWT token signing';
 
     public function handle(): int
@@ -17,14 +18,15 @@ class GenerateJwtKeys extends Command
         $publicKeyPath = storage_path('keys/jwt_public.pem');
 
         // Create keys directory if it doesn't exist
-        if (!File::isDirectory($keysPath)) {
+        if (! File::isDirectory($keysPath)) {
             File::makeDirectory($keysPath, 0755, true);
             $this->info('Created keys directory');
         }
 
         // Check if keys already exist
-        if (File::exists($privateKeyPath) && !$this->option('force')) {
+        if (File::exists($privateKeyPath) && ! $this->option('force')) {
             $this->error('Keys already exist. Use --force to regenerate');
+
             return self::FAILURE;
         }
 
@@ -40,6 +42,7 @@ class GenerateJwtKeys extends Command
 
         if ($res === false) {
             $this->error('Failed to generate key pair');
+
             return self::FAILURE;
         }
 
@@ -53,8 +56,8 @@ class GenerateJwtKeys extends Command
         File::put($publicKeyPath, $publicKey['key']);
         File::chmod($publicKeyPath, 0644);
 
-        $this->info('✓ Private key: ' . $privateKeyPath);
-        $this->info('✓ Public key: ' . $publicKeyPath);
+        $this->info('✓ Private key: '.$privateKeyPath);
+        $this->info('✓ Public key: '.$publicKeyPath);
         $this->warn('Keep private key secure and never commit to version control!');
 
         return self::SUCCESS;

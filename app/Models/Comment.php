@@ -19,13 +19,14 @@ class Comment extends Model
     ];
 
     protected $casts = [
-        'id'               => 'string',
-        'user_id'          => 'string',
-        'commentable_id'   => 'string',
-        'is_internal'      => 'boolean',
+        'id' => 'string',
+        'user_id' => 'string',
+        'commentable_id' => 'string',
+        'is_internal' => 'boolean',
     ];
 
     public $incrementing = false;
+
     protected $keyType = 'string';
 
     public function user(): BelongsTo

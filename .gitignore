@@ -31,3 +31,5 @@ yarn.lock
 vendor
 .claude
 CLAUDE.md
+/docs
+/seeders

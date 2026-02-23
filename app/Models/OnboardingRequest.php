@@ -26,17 +26,18 @@ class OnboardingRequest extends Model
     ];
 
     protected $casts = [
-        'id'                  => 'string',
-        'client_id'           => 'string',
-        'system_id'           => 'string',
-        'created_by_user_id'  => 'string',
+        'id' => 'string',
+        'client_id' => 'string',
+        'system_id' => 'string',
+        'created_by_user_id' => 'string',
         'expected_start_date' => 'date',
-        'expected_end_date'   => 'date',
-        'actual_start_date'   => 'date',
-        'actual_end_date'     => 'date',
+        'expected_end_date' => 'date',
+        'actual_start_date' => 'date',
+        'actual_end_date' => 'date',
     ];
 
     public $incrementing = false;
+
     protected $keyType = 'string';
 
     public function client(): BelongsTo
@@ -62,6 +63,6 @@ class OnboardingRequest extends Model
     public function comments(): HasMany
     {
         return $this->hasMany(Comment::class, 'commentable_id')
-                    ->where('commentable_type', 'onboarding_request');
+            ->where('commentable_type', 'onboarding_request');
     }
 }

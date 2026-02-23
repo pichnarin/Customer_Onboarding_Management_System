@@ -26,15 +26,16 @@ class Client extends Model
     ];
 
     protected $casts = [
-        'id'               => 'string',
+        'id' => 'string',
         'assigned_sale_id' => 'string',
-        'banner_image_id'  => 'string',
-        'logo_image_id'    => 'string',
-        'social_links'     => 'array',
-        'is_active'        => 'boolean',
+        'banner_image_id' => 'string',
+        'logo_image_id' => 'string',
+        'social_links' => 'array',
+        'is_active' => 'boolean',
     ];
 
     public $incrementing = false;
+
     protected $keyType = 'string';
 
     public function assignedSale(): BelongsTo

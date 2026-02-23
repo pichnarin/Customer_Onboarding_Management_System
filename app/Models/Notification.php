@@ -23,15 +23,16 @@ class Notification extends Model
     ];
 
     protected $casts = [
-        'id'                 => 'string',
-        'user_id'            => 'string',
-        'client_contact_id'  => 'string',
-        'related_entity_id'  => 'string',
-        'is_read'            => 'boolean',
-        'read_at'            => 'datetime',
+        'id' => 'string',
+        'user_id' => 'string',
+        'client_contact_id' => 'string',
+        'related_entity_id' => 'string',
+        'is_read' => 'boolean',
+        'read_at' => 'datetime',
     ];
 
     public $incrementing = false;
+
     protected $keyType = 'string';
 
     public function user(): BelongsTo

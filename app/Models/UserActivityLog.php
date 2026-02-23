@@ -20,12 +20,13 @@ class UserActivityLog extends Model
     ];
 
     protected $casts = [
-        'id'       => 'string',
-        'user_id'  => 'string',
+        'id' => 'string',
+        'user_id' => 'string',
         'metadata' => 'array',
     ];
 
     public $incrementing = false;
+
     protected $keyType = 'string';
 
     public function user(): BelongsTo

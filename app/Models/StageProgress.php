@@ -21,15 +21,16 @@ class StageProgress extends Model
     ];
 
     protected $casts = [
-        'id'                  => 'string',
-        'assignment_id'       => 'string',
-        'stage_id'            => 'string',
+        'id' => 'string',
+        'assignment_id' => 'string',
+        'stage_id' => 'string',
         'progress_percentage' => 'decimal:2',
-        'started_at'          => 'datetime',
-        'completed_at'        => 'datetime',
+        'started_at' => 'datetime',
+        'completed_at' => 'datetime',
     ];
 
     public $incrementing = false;
+
     protected $keyType = 'string';
 
     public function assignment(): BelongsTo

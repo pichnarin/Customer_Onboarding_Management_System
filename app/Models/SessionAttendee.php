@@ -19,13 +19,14 @@ class SessionAttendee extends Model
     ];
 
     protected $casts = [
-        'id'                => 'string',
-        'session_id'        => 'string',
+        'id' => 'string',
+        'session_id' => 'string',
         'client_contact_id' => 'string',
-        'attended_at'       => 'datetime',
+        'attended_at' => 'datetime',
     ];
 
     public $incrementing = false;
+
     protected $keyType = 'string';
 
     public function session(): BelongsTo

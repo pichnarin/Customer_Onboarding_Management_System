@@ -21,13 +21,14 @@ class SessionMaterial extends Model
     ];
 
     protected $casts = [
-        'id'          => 'string',
-        'session_id'  => 'string',
-        'media_id'    => 'string',
+        'id' => 'string',
+        'session_id' => 'string',
+        'media_id' => 'string',
         'uploaded_at' => 'datetime',
     ];
 
     public $incrementing = false;
+
     protected $keyType = 'string';
 
     public function session(): BelongsTo

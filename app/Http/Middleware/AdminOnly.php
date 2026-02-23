@@ -13,7 +13,7 @@ class AdminOnly
     {
         $role = $request->get('auth_role');
 
-        if (!$role || strtolower($role) !== 'admin') {
+        if (! $role || strtolower($role) !== 'admin') {
             throw new AdminOnlyException('Admin access required for this resource');
         }
 

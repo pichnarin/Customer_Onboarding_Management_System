@@ -2,13 +2,12 @@
 
 namespace Tests\Unit\Services;
 
-use Tests\TestCase;
-use App\Services\OtpService;
-use App\Models\Credential;
 use App\Exceptions\OtpRateLimitException;
 use App\Mail\OtpMail;
+use App\Services\OtpService;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Mail;
+use Tests\TestCase;
 
 class OtpServiceTest extends TestCase
 {
@@ -36,8 +35,8 @@ class OtpServiceTest extends TestCase
         $otp = $this->otpService->generateOtp();
 
         $this->assertTrue(ctype_digit($otp));
-        $this->assertGreaterThanOrEqual(1000, (int)$otp);
-        $this->assertLessThanOrEqual(9999, (int)$otp);
+        $this->assertGreaterThanOrEqual(1000, (int) $otp);
+        $this->assertLessThanOrEqual(9999, (int) $otp);
     }
 
     /** @test */

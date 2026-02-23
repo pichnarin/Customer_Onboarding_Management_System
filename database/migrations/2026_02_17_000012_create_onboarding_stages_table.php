@@ -17,11 +17,15 @@ return new class extends Migration
             $table->uuid('system_id');
             $table->boolean('is_active')->default(true);
             $table->timestamps();
+            $table->softDeletes();
 
             $table->foreign('system_id')
-                  ->references('id')
-                  ->on('systems')
-                  ->onDelete('restrict');
+                ->references('id')
+                ->on('systems')
+                ->onDelete('restrict');
+
+            $table->unique(['system_id', 'sequence_order']);
+            $table->unique(['system_id', 'name']);
 
             $table->index('system_id');
             $table->index('sequence_order');

@@ -18,16 +18,17 @@ return new class extends Migration
             $table->timestamp('completed_at')->nullable();
             $table->text('notes')->nullable();
             $table->timestamps();
+            $table->softDeletes();
 
             $table->foreign('assignment_id')
-                  ->references('id')
-                  ->on('training_assignments')
-                  ->onDelete('cascade');
+                ->references('id')
+                ->on('training_assignments')
+                ->onDelete('cascade');
 
             $table->foreign('stage_id')
-                  ->references('id')
-                  ->on('onboarding_stages')
-                  ->onDelete('restrict');
+                ->references('id')
+                ->on('onboarding_stages')
+                ->onDelete('restrict');
 
             $table->unique(['assignment_id', 'stage_id']);
             $table->index('assignment_id');

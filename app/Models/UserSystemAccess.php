@@ -22,14 +22,15 @@ class UserSystemAccess extends Model
     ];
 
     protected $casts = [
-        'id'         => 'string',
-        'user_id'    => 'string',
-        'system_id'  => 'string',
+        'id' => 'string',
+        'user_id' => 'string',
+        'system_id' => 'string',
         'granted_by' => 'string',
         'granted_at' => 'datetime',
     ];
 
     public $incrementing = false;
+
     protected $keyType = 'string';
 
     public function user(): BelongsTo

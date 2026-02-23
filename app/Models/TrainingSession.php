@@ -26,18 +26,40 @@ class TrainingSession extends Model
         'physical_location',
         'status',
         'completion_notes',
+        'start_proof_media_id',
+        'end_proof_media_id',
+        'student_count',
+        'cancellation_reason',
+        'cancelled_by_user_id',
+        'cancelled_at',
+        'reschedule_reason',
+        'start_latitude',
+        'start_longitude',
+        'end_latitude',
+        'end_longitude',
+        'creator_id',
     ];
 
     protected $casts = [
-        'id'                => 'string',
-        'assignment_id'     => 'string',
-        'stage_id'          => 'string',
-        'scheduled_date'    => 'date',
+        'id' => 'string',
+        'assignment_id' => 'string',
+        'stage_id' => 'string',
+        'start_proof_media_id' => 'string',
+        'end_proof_media_id' => 'string',
+        'cancelled_by_user_id' => 'string',
+        'scheduled_date'  => 'date',
         'actual_start_time' => 'datetime',
         'actual_end_time'   => 'datetime',
+        'cancelled_at'      => 'datetime',
+        'start_latitude'    => 'float',
+        'start_longitude'   => 'float',
+        'end_latitude'      => 'float',
+        'end_longitude'     => 'float',
+        'creator_id' => 'string',
     ];
 
     public $incrementing = false;
+
     protected $keyType = 'string';
 
     public function assignment(): BelongsTo
@@ -68,6 +90,31 @@ class TrainingSession extends Model
     public function comments(): HasMany
     {
         return $this->hasMany(Comment::class, 'commentable_id')
-                    ->where('commentable_type', 'session');
+            ->where('commentable_type', 'session');
+    }
+
+    public function startProof(): BelongsTo
+    {
+        return $this->belongsTo(Media::class, 'start_proof_media_id');
+    }
+
+    public function endProof(): BelongsTo
+    {
+        return $this->belongsTo(Media::class, 'end_proof_media_id');
+    }
+
+    public function students(): HasMany
+    {
+        return $this->hasMany(SessionStudent::class, 'session_id');
+    }
+
+    public function cancelledBy(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'cancelled_by_user_id');
+    }
+
+    public function creator(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'creator_id');
     }
 }

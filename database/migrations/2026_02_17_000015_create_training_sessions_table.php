@@ -25,16 +25,17 @@ return new class extends Migration
             $table->enum('status', ['scheduled', 'in_progress', 'completed', 'cancelled', 'rescheduled'])->default('scheduled');
             $table->text('completion_notes')->nullable();
             $table->timestamps();
+            $table->softDeletes();
 
             $table->foreign('assignment_id')
-                  ->references('id')
-                  ->on('training_assignments')
-                  ->onDelete('cascade');
+                ->references('id')
+                ->on('training_assignments')
+                ->onDelete('cascade');
 
             $table->foreign('stage_id')
-                  ->references('id')
-                  ->on('onboarding_stages')
-                  ->onDelete('restrict');
+                ->references('id')
+                ->on('onboarding_stages')
+                ->onDelete('restrict');
 
             $table->index('assignment_id');
             $table->index('stage_id');

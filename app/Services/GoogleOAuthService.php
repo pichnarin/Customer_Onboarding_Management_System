@@ -6,9 +6,9 @@ use App\Models\OAuthToken;
 use Illuminate\Http\Client\Response;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
+use Laravel\Socialite\Facades\Socialite;
 use Laravel\Socialite\Two\GoogleProvider;
 use Laravel\Socialite\Two\User as SocialiteUser;
-use Laravel\Socialite\Facades\Socialite;
 
 class GoogleOAuthService
 {
@@ -68,7 +68,7 @@ class GoogleOAuthService
             ->where('provider', 'google')
             ->first();
 
-        if (!$token) {
+        if (! $token) {
             return [
                 'connected' => false,
                 'provider' => 'google',
@@ -100,18 +100,19 @@ class GoogleOAuthService
             ->where('provider', 'google')
             ->first();
 
-        if (!$token) {
+        if (! $token) {
             return null;
         }
 
-        if (!$token->isExpired()) {
+        if (! $token->isExpired()) {
             return $token->access_token;
         }
 
-        if (!$token->refresh_token) {
+        if (! $token->refresh_token) {
             Log::warning('Google token expired and no refresh token available', [
                 'user_id' => $userId,
             ]);
+
             return null;
         }
 
@@ -128,12 +129,13 @@ class GoogleOAuthService
             'grant_type' => 'refresh_token',
         ]);
 
-        if (!$response->successful()) {
+        if (! $response->successful()) {
             Log::error('Failed to refresh Google access token', [
                 'user_id' => $token->user_id,
                 'status' => $response->status(),
                 'body' => $response->json(),
             ]);
+
             return null;
         }
 

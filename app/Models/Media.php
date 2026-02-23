@@ -26,12 +26,13 @@ class Media extends Model
     ];
 
     protected $casts = [
-        'id'                   => 'string',
-        'uploaded_by_user_id'  => 'string',
-        'file_size'            => 'integer',
+        'id' => 'string',
+        'uploaded_by_user_id' => 'string',
+        'file_size' => 'integer',
     ];
 
     public $incrementing = false;
+
     protected $keyType = 'string';
 
     public function uploadedBy(): BelongsTo

@@ -22,21 +22,22 @@ return new class extends Migration
             $table->uuid('banner_image_id')->nullable();
             $table->uuid('logo_image_id')->nullable();
             $table->timestamps();
+            $table->softDeletes();
 
             $table->foreign('assigned_sale_id')
-                  ->references('id')
-                  ->on('users')
-                  ->onDelete('restrict');
+                ->references('id')
+                ->on('users')
+                ->onDelete('restrict');
 
             $table->foreign('banner_image_id')
-                  ->references('id')
-                  ->on('media')
-                  ->onDelete('set null');
+                ->references('id')
+                ->on('media')
+                ->onDelete('set null');
 
             $table->foreign('logo_image_id')
-                  ->references('id')
-                  ->on('media')
-                  ->onDelete('set null');
+                ->references('id')
+                ->on('media')
+                ->onDelete('set null');
 
             $table->index('code');
             $table->index('assigned_sale_id');

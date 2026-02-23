@@ -16,19 +16,19 @@ return new class extends Migration
             $table->uuid('granted_by')->nullable();
 
             $table->foreign('user_id')
-                  ->references('id')
-                  ->on('users')
-                  ->onDelete('cascade');
+                ->references('id')
+                ->on('users')
+                ->onDelete('cascade');
 
             $table->foreign('system_id')
-                  ->references('id')
-                  ->on('systems')
-                  ->onDelete('cascade');
+                ->references('id')
+                ->on('systems')
+                ->onDelete('cascade');
 
             $table->foreign('granted_by')
-                  ->references('id')
-                  ->on('users')
-                  ->onDelete('set null');
+                ->references('id')
+                ->on('users')
+                ->onDelete('set null');
 
             $table->unique(['user_id', 'system_id']);
         });

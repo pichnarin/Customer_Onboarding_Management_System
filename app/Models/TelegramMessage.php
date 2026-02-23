@@ -22,13 +22,14 @@ class TelegramMessage extends Model
     ];
 
     protected $casts = [
-        'id'                 => 'string',
-        'client_contact_id'  => 'string',
+        'id' => 'string',
+        'client_contact_id' => 'string',
         'related_session_id' => 'string',
-        'sent_at'            => 'datetime',
+        'sent_at' => 'datetime',
     ];
 
     public $incrementing = false;
+
     protected $keyType = 'string';
 
     public function clientContact(): BelongsTo

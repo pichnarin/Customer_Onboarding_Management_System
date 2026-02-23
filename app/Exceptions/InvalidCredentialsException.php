@@ -5,6 +5,7 @@ namespace App\Exceptions;
 class InvalidCredentialsException extends BaseException
 {
     protected int $httpStatusCode = 401;
+
     protected string $logLevel = 'warning';
 
     public function __construct(string $message = 'Invalid username or password', int $code = 0, ?\Throwable $previous = null, array $context = [])

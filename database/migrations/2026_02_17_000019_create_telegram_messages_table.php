@@ -19,16 +19,17 @@ return new class extends Migration
             $table->text('error_message')->nullable();
             $table->uuid('related_session_id')->nullable();
             $table->timestamps();
+            $table->softDeletes();
 
             $table->foreign('client_contact_id')
-                  ->references('id')
-                  ->on('client_contacts')
-                  ->onDelete('cascade');
+                ->references('id')
+                ->on('client_contacts')
+                ->onDelete('cascade');
 
             $table->foreign('related_session_id')
-                  ->references('id')
-                  ->on('training_sessions')
-                  ->onDelete('set null');
+                ->references('id')
+                ->on('training_sessions')
+                ->onDelete('set null');
 
             $table->index('client_contact_id');
             $table->index('sent_at');

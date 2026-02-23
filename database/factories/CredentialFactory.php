@@ -28,7 +28,7 @@ class CredentialFactory extends Factory
             'user_id' => User::factory(),
             'email' => fake()->unique()->safeEmail(),
             'username' => fake()->unique()->userName(),
-            'phone_number' => '+1' . fake()->numerify('##########'),
+            'phone_number' => '+1'.fake()->numerify('##########'),
             'password' => static::$password ??= Hash::make('Test@12345'),
             'otp' => null,
             'otp_expiry' => null,

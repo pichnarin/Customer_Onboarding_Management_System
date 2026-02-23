@@ -19,22 +19,24 @@ return new class extends Migration
             $table->timestamp('accepted_at')->nullable();
             $table->timestamp('started_at')->nullable();
             $table->timestamp('completed_at')->nullable();
+            $table->timestamp('rejected_at')->nullable();
             $table->text('rejection_reason')->nullable();
+            $table->softDeletes();
 
             $table->foreign('onboarding_request_id')
-                  ->references('id')
-                  ->on('onboarding_requests')
-                  ->onDelete('cascade');
+                ->references('id')
+                ->on('onboarding_requests')
+                ->onDelete('cascade');
 
             $table->foreign('trainer_id')
-                  ->references('id')
-                  ->on('users')
-                  ->onDelete('restrict');
+                ->references('id')
+                ->on('users')
+                ->onDelete('restrict');
 
             $table->foreign('assigned_by_user_id')
-                  ->references('id')
-                  ->on('users')
-                  ->onDelete('restrict');
+                ->references('id')
+                ->on('users')
+                ->onDelete('restrict');
 
             $table->index('onboarding_request_id');
             $table->index('trainer_id');

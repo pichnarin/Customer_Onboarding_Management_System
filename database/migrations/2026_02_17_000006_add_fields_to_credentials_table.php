@@ -18,9 +18,9 @@ return new class extends Migration
             $table->timestamp('reset_token_expires_at')->nullable()->after('reset_token');
 
             $table->foreign('profile_image_id')
-                  ->references('id')
-                  ->on('media')
-                  ->onDelete('set null');
+                ->references('id')
+                ->on('media')
+                ->onDelete('set null');
 
             $table->index('reset_token');
         });

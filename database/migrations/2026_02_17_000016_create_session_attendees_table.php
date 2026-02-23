@@ -16,16 +16,17 @@ return new class extends Migration
             $table->dateTime('attended_at')->nullable();
             $table->text('notes')->nullable();
             $table->timestamps();
+            $table->softDeletes();
 
             $table->foreign('session_id')
-                  ->references('id')
-                  ->on('training_sessions')
-                  ->onDelete('cascade');
+                ->references('id')
+                ->on('training_sessions')
+                ->onDelete('cascade');
 
             $table->foreign('client_contact_id')
-                  ->references('id')
-                  ->on('client_contacts')
-                  ->onDelete('cascade');
+                ->references('id')
+                ->on('client_contacts')
+                ->onDelete('cascade');
 
             $table->unique(['session_id', 'client_contact_id']);
             $table->index('session_id');

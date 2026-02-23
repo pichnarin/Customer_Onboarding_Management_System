@@ -2,24 +2,23 @@
 
 namespace Tests\Unit\Services;
 
-use Tests\TestCase;
+use App\Exceptions\AccountSuspendedException;
+use App\Exceptions\InvalidCredentialsException;
+use App\Exceptions\InvalidOtpException;
+use App\Exceptions\OtpExpiredException;
+use App\Models\Credential;
 use App\Services\AuthService;
 use App\Services\JwtService;
 use App\Services\OtpService;
-use App\Models\User;
-use App\Models\Credential;
-use App\Exceptions\InvalidCredentialsException;
-use App\Exceptions\AccountSuspendedException;
-use App\Exceptions\InvalidOtpException;
-use App\Exceptions\OtpExpiredException;
-use Carbon\Carbon;
-use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
+use Tests\TestCase;
 
 class AuthServiceTest extends TestCase
 {
     private AuthService $authService;
+
     private JwtService $jwtService;
+
     private OtpService $otpService;
 
     protected function setUp(): void

@@ -22,9 +22,9 @@ return new class extends Migration
             $table->timestamps();
 
             $table->foreign('client_id')
-                  ->references('id')
-                  ->on('clients')
-                  ->onDelete('cascade');
+                ->references('id')
+                ->on('clients')
+                ->onDelete('cascade');
 
             $table->index('client_id');
             $table->index('telegram_chat_id');

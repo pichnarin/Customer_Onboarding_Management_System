@@ -24,13 +24,14 @@ class ClientContact extends Model
     ];
 
     protected $casts = [
-        'id'                 => 'string',
-        'client_id'          => 'string',
+        'id' => 'string',
+        'client_id' => 'string',
         'is_primary_contact' => 'boolean',
-        'is_active'          => 'boolean',
+        'is_active' => 'boolean',
     ];
 
     public $incrementing = false;
+
     protected $keyType = 'string';
 
     public function client(): BelongsTo

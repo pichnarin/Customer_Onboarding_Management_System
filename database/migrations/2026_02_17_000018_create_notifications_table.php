@@ -20,16 +20,17 @@ return new class extends Migration
             $table->boolean('is_read')->default(false);
             $table->timestamp('read_at')->nullable();
             $table->timestamps();
+            $table->softDeletes();
 
             $table->foreign('user_id')
-                  ->references('id')
-                  ->on('users')
-                  ->onDelete('cascade');
+                ->references('id')
+                ->on('users')
+                ->onDelete('cascade');
 
             $table->foreign('client_contact_id')
-                  ->references('id')
-                  ->on('client_contacts')
-                  ->onDelete('cascade');
+                ->references('id')
+                ->on('client_contacts')
+                ->onDelete('cascade');
 
             $table->index('user_id');
             $table->index('client_contact_id');

@@ -5,16 +5,16 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\HasOne;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
 class User extends Authenticatable
 {
-    use HasFactory, Notifiable, HasUuids, SoftDeletes;
+    use HasFactory, HasUuids, Notifiable, SoftDeletes;
 
     protected $fillable = [
         'role_id',
@@ -39,6 +39,7 @@ class User extends Authenticatable
     ];
 
     public $incrementing = false;
+
     protected $keyType = 'string';
 
     // Relationships
@@ -80,8 +81,8 @@ class User extends Authenticatable
     public function systems(): BelongsToMany
     {
         return $this->belongsToMany(System::class, 'user_system_access')
-                    ->withPivot('granted_at', 'granted_by')
-                    ->using(UserSystemAccess::class);
+            ->withPivot('granted_at', 'granted_by')
+            ->using(UserSystemAccess::class);
     }
 
     public function activityLogs(): HasMany

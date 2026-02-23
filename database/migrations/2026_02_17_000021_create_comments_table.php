@@ -16,11 +16,12 @@ return new class extends Migration
             $table->text('content');
             $table->boolean('is_internal')->default(false);
             $table->timestamps();
+            $table->softDeletes();
 
             $table->foreign('user_id')
-                  ->references('id')
-                  ->on('users')
-                  ->onDelete('cascade');
+                ->references('id')
+                ->on('users')
+                ->onDelete('cascade');
 
             $table->index('user_id');
             $table->index(['commentable_type', 'commentable_id']);

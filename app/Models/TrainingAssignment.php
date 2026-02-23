@@ -27,22 +27,32 @@ class TrainingAssignment extends Model
     ];
 
     protected $casts = [
-        'id'                     => 'string',
-        'onboarding_request_id'  => 'string',
-        'trainer_id'             => 'string',
-        'assigned_by_user_id'    => 'string',
-        'assigned_at'            => 'datetime',
-        'accepted_at'            => 'datetime',
-        'started_at'             => 'datetime',
-        'completed_at'           => 'datetime',
+        'id' => 'string',
+        'onboarding_request_id' => 'string',
+        'trainer_id' => 'string',
+        'assigned_by_user_id' => 'string',
+        'assigned_at' => 'datetime',
+        'accepted_at' => 'datetime',
+        'started_at' => 'datetime',
+        'completed_at' => 'datetime',
     ];
 
     public $incrementing = false;
+
     protected $keyType = 'string';
 
     public function onboardingRequest(): BelongsTo
     {
         return $this->belongsTo(OnboardingRequest::class);
+    }
+
+    public static function hasActiveAssignmentForSystem(string $systemId): bool
+    {
+        return self::whereIn('status', ['assigned', 'accepted', 'in_progress'])
+            ->whereHas('onboardingRequest', function ($query) use ($systemId) {
+                $query->where('system_id', $systemId);
+            })
+            ->exists();
     }
 
     public function trainer(): BelongsTo
@@ -65,9 +75,10 @@ class TrainingAssignment extends Model
         return $this->hasMany(StageProgress::class, 'assignment_id');
     }
 
+
     public function comments(): HasMany
     {
         return $this->hasMany(Comment::class, 'commentable_id')
-                    ->where('commentable_type', 'assignment');
+            ->where('commentable_type', 'assignment');
     }
 }

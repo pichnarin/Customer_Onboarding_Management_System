@@ -15,16 +15,17 @@ return new class extends Migration
             $table->enum('material_type', ['presentation', 'handout', 'recording', 'other'])->default('other');
             $table->text('description')->nullable();
             $table->timestamp('uploaded_at')->useCurrent();
+            $table->softDeletes();
 
             $table->foreign('session_id')
-                  ->references('id')
-                  ->on('training_sessions')
-                  ->onDelete('cascade');
+                ->references('id')
+                ->on('training_sessions')
+                ->onDelete('cascade');
 
             $table->foreign('media_id')
-                  ->references('id')
-                  ->on('media')
-                  ->onDelete('cascade');
+                ->references('id')
+                ->on('media')
+                ->onDelete('cascade');
 
             $table->index('session_id');
             $table->index('media_id');

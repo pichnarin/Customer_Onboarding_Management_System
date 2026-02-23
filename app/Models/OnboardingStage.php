@@ -21,12 +21,13 @@ class OnboardingStage extends Model
     ];
 
     protected $casts = [
-        'id'        => 'string',
+        'id' => 'string',
         'system_id' => 'string',
         'is_active' => 'boolean',
     ];
 
     public $incrementing = false;
+
     protected $keyType = 'string';
 
     public function system(): BelongsTo

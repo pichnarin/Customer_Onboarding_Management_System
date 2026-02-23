@@ -2,16 +2,14 @@
 
 namespace App\Services;
 
-use App\Models\User;
-use App\Models\Credential;
-use App\Models\Role;
-use App\Exceptions\InvalidCredentialsException;
 use App\Exceptions\AccountSuspendedException;
+use App\Exceptions\InvalidCredentialsException;
 use App\Exceptions\InvalidOtpException;
 use App\Exceptions\OtpExpiredException;
+use App\Models\Credential;
+use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\DB;
 
 class AuthService
 {
@@ -32,12 +30,12 @@ class AuthService
             ->with('user.role')
             ->first();
 
-        if (!$credential) {
+        if (! $credential) {
             throw new InvalidCredentialsException('Invalid username or password');
         }
 
         // Verify password
-        if (!Hash::check($password, $credential->password)) {
+        if (! Hash::check($password, $credential->password)) {
             throw new InvalidCredentialsException('Invalid username or password');
         }
 
@@ -65,12 +63,12 @@ class AuthService
             ->with('user.role')
             ->first();
 
-        if (!$credential) {
+        if (! $credential) {
             throw new InvalidCredentialsException('Invalid credentials');
         }
 
         // Check if OTP exists
-        if (!$credential->otp) {
+        if (! $credential->otp) {
             throw new InvalidOtpException('No OTP has been generated. Please login first.');
         }
 
@@ -80,7 +78,7 @@ class AuthService
         }
 
         // Verify OTP
-        if (!$this->otpService->verifyOtp($credential, $otp)) {
+        if (! $this->otpService->verifyOtp($credential, $otp)) {
             throw new InvalidOtpException('Invalid OTP code');
         }
 
