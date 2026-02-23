@@ -53,6 +53,7 @@ trait GeneratesTokens
     protected function authHeadersFor(User $user): array
     {
         $token = $this->generateAccessToken($user);
+
         return $this->authHeaders($token);
     }
 }

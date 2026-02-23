@@ -14,7 +14,7 @@ return [
     | Token Expiration Times (in minutes)
     |--------------------------------------------------------------------------
     */
-    'access_token_expiry' => env('JWT_ACCESS_TOKEN_EXPIRY', 1440), // 1 day
+    'access_token_expiry' => env('JWT_ACCESS_TOKEN_EXPIRY', 1440), // 15 days
     'refresh_token_expiry' => env('JWT_REFRESH_TOKEN_EXPIRY', 43200), // 30 days
 
     /*

@@ -2,24 +2,27 @@
 
 namespace App\Services;
 
-use App\Models\User;
-use App\Models\RefreshToken;
-use Carbon\Carbon;
-use App\Exceptions\JwtKeyNotFoundException;
-use App\Exceptions\InvalidTokenException;
-use App\Exceptions\TokenExpiredException;
-use App\Exceptions\InvalidTokenTypeException;
-use App\Exceptions\RefreshTokenRevokedException;
-use App\Exceptions\UserNotFoundException;
 use App\Exceptions\AccountSuspendedException;
+use App\Exceptions\InvalidTokenException;
+use App\Exceptions\InvalidTokenTypeException;
+use App\Exceptions\JwtKeyNotFoundException;
+use App\Exceptions\RefreshTokenRevokedException;
+use App\Exceptions\TokenExpiredException;
+use App\Exceptions\UserNotFoundException;
+use App\Models\RefreshToken;
+use App\Models\User;
+use Carbon\Carbon;
 use Firebase\JWT\JWT;
 use Firebase\JWT\Key;
 
 class JwtService
 {
     private string $privateKey;
+
     private string $publicKey;
+
     private int $accessTokenExpiry;
+
     private int $refreshTokenExpiry;
 
     public function __construct()
@@ -29,11 +32,11 @@ class JwtService
             $publicKeyPath = storage_path(config('jwt.public_key_path', 'keys/jwt_public.pem'));
 
             // Check if key files exist
-            if (!file_exists($privateKeyPath)) {
+            if (! file_exists($privateKeyPath)) {
                 throw new JwtKeyNotFoundException("JWT private key not found at: {$privateKeyPath}");
             }
 
-            if (!file_exists($publicKeyPath)) {
+            if (! file_exists($publicKeyPath)) {
                 throw new JwtKeyNotFoundException("JWT public key not found at: {$publicKeyPath}");
             }
 
@@ -43,12 +46,12 @@ class JwtService
 
             // Verify successful read
             if ($this->privateKey === false || $this->publicKey === false) {
-                throw new JwtKeyNotFoundException("Failed to read JWT key files");
+                throw new JwtKeyNotFoundException('Failed to read JWT key files');
             }
         } catch (JwtKeyNotFoundException $e) {
             throw $e;
         } catch (\Throwable $e) {
-            throw new JwtKeyNotFoundException("Error loading JWT keys: " . $e->getMessage(), 0, $e);
+            throw new JwtKeyNotFoundException('Error loading JWT keys: '.$e->getMessage(), 0, $e);
         }
 
         $this->accessTokenExpiry = config('jwt.access_token_expiry', 1440); // minutes
@@ -113,7 +116,7 @@ class JwtService
         } catch (\Firebase\JWT\SignatureInvalidException $e) {
             throw new InvalidTokenException('Token signature is invalid', 0, $e);
         } catch (\Throwable $e) {
-            throw new InvalidTokenException('Invalid token: ' . $e->getMessage(), 0, $e);
+            throw new InvalidTokenException('Invalid token: '.$e->getMessage(), 0, $e);
         }
     }
 
@@ -135,7 +138,7 @@ class JwtService
             ->where('user_id', $decoded->user_id)
             ->first();
 
-        if (!$storedToken) {
+        if (! $storedToken) {
             throw new InvalidTokenException('Refresh token not found in database');
         }
 
@@ -143,14 +146,14 @@ class JwtService
             throw new RefreshTokenRevokedException('Refresh token has been revoked');
         }
 
-        if (!$storedToken->isValid()) {
+        if (! $storedToken->isValid()) {
             throw new TokenExpiredException('Refresh token has expired');
         }
 
         // Get user
         $user = User::with('role')->find($decoded->user_id);
 
-        if (!$user) {
+        if (! $user) {
             throw new UserNotFoundException('User not found', 0, null, ['user_id' => $decoded->user_id]);
         }
 

@@ -2,8 +2,8 @@
 
 namespace App\Http\Requests;
 
-use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Contracts\Validation\Validator;
+use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Http\Exceptions\HttpResponseException;
 
 class AdminCreateUserRequest extends FormRequest
@@ -23,7 +23,7 @@ class AdminCreateUserRequest extends FormRequest
             'address' => ['required', 'string', 'max:500'],
             'gender' => ['required', 'in:male,female,other'],
             'nationality' => ['required', 'string', 'max:100'],
-            'role' => ['required', 'string', 'in:admin,employee,trainee'],
+            'role' => ['required', 'string', 'in:admin,sale,trainer'],
 
             // Personal Information (images)
             'professtional_photo' => ['nullable', 'file', 'mimes:jpeg,jpg,png', 'max:5120'], // 5MB max
@@ -50,7 +50,7 @@ class AdminCreateUserRequest extends FormRequest
                 'string',
                 'min:8',
                 'max:100',
-                'regex:/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&#])[A-Za-z\d@$!%*?&#]+$/'
+                'regex:/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&#])[A-Za-z\d@$!%*?&#]+$/',
             ],
             'password_confirmation' => ['required', 'same:password'],
         ];
@@ -77,7 +77,7 @@ class AdminCreateUserRequest extends FormRequest
         throw new HttpResponseException(response()->json([
             'success' => false,
             'message' => 'Validation errors',
-            'errors' => $validator->errors()
+            'errors' => $validator->errors(),
         ], 422));
     }
 }

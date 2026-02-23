@@ -24,5 +24,12 @@
 Homestead.json
 Homestead.yaml
 Thumbs.db
+composer.phar
+composer.lock
+package-lock.json
+yarn.lock
+vendor
 .claude
 CLAUDE.md
+/docs
+/seeders

@@ -2,8 +2,8 @@
 
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
-use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
@@ -21,8 +21,8 @@ return new class extends Migration
         // Seed default roles
         DB::table('roles')->insert([
             ['id' => \Illuminate\Support\Str::uuid(), 'role' => 'admin', 'created_at' => now(), 'updated_at' => now()],
-            ['id' => \Illuminate\Support\Str::uuid(), 'role' => 'employee', 'created_at' => now(), 'updated_at' => now()],
-            ['id' => \Illuminate\Support\Str::uuid(), 'role' => 'trainee', 'created_at' => now(), 'updated_at' => now()],
+            ['id' => \Illuminate\Support\Str::uuid(), 'role' => 'sale', 'created_at' => now(), 'updated_at' => now()],
+            ['id' => \Illuminate\Support\Str::uuid(), 'role' => 'trainer', 'created_at' => now(), 'updated_at' => now()],
         ]);
     }
 

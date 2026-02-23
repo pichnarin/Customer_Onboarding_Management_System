@@ -29,37 +29,38 @@ class PersonalInformation extends Model
     ];
 
     public $incrementing = false;
+
     protected $keyType = 'string';
 
     // Relationships
     public function user(): BelongsTo
     {
-        return $this->belongsTo(User::class);   
+        return $this->belongsTo(User::class);
     }
 
     // Helper methods for image URLs
     public function getNationalityCardUrlAttribute(): string
     {
-        return $this->nationality_card ? asset('storage/' . $this->nationality_card) : '';
+        return $this->nationality_card ? asset('storage/'.$this->nationality_card) : '';
     }
 
     public function getProfesstionalPhotoUrlAttribute(): string
     {
-        return $this->professtional_photo ? asset('storage/' . $this->professtional_photo) : '';
+        return $this->professtional_photo ? asset('storage/'.$this->professtional_photo) : '';
     }
 
     public function getFamilyBookUrlAttribute(): string
     {
-        return $this->family_book ? asset('storage/' . $this->family_book) : '';
+        return $this->family_book ? asset('storage/'.$this->family_book) : '';
     }
 
     public function getBirthCertificateUrlAttribute(): string
     {
-        return $this->birth_certificate ? asset('storage/' . $this->birth_certificate) : '';
+        return $this->birth_certificate ? asset('storage/'.$this->birth_certificate) : '';
     }
 
     public function getDegreeCertificateUrlAttribute(): string
     {
-        return $this->degreee_certificate ? asset('storage/' . $this->degreee_certificate) : '';
+        return $this->degreee_certificate ? asset('storage/'.$this->degreee_certificate) : '';
     }
 }

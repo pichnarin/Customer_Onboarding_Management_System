@@ -2,18 +2,20 @@
 
 namespace App\Services;
 
-use App\Models\User;
-use App\Models\Credential;
-use App\Models\Role;
-use App\Models\PersonalInformation;
-use App\Models\EmergencyContact;
 use App\Exceptions\RoleNotFoundException;
 use App\Exceptions\UserNotFoundException;
+use App\Models\Client;
+use App\Models\Credential;
+use App\Models\EmergencyContact;
+use App\Models\PersonalInformation;
+use App\Models\Role;
+use App\Models\User;
+use App\Models\System;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Http\UploadedFile;
 
 class UserService
 {
@@ -23,9 +25,7 @@ class UserService
         private OtpService $otpService
     ) {}
 
-    /**
-     * Create new user (admin only)
-     */
+
     public function createUser(
         array $userData,
         array $credentialData,
@@ -40,7 +40,7 @@ class UserService
                 // Get role
                 $role = Role::where('role', $userData['role'] ?? 'user')->first();
 
-                if (!$role) {
+                if (! $role) {
                     throw new RoleNotFoundException("Role '{$userData['role']}' not found");
                 }
 
@@ -65,12 +65,12 @@ class UserService
                 ]);
 
                 // Create personal information with image uploads
-                if (!empty($personalInfoData)) {
+                if (! empty($personalInfoData)) {
                     $this->createPersonalInformation($user->id, $personalInfoData);
                 }
 
                 // Create emergency contact
-                if (!empty($emergencyContactData)) {
+                if (! empty($emergencyContactData)) {
                     $this->createEmergencyContact($user->id, $emergencyContactData);
                 }
 
@@ -101,9 +101,6 @@ class UserService
         }
     }
 
-    /**
-     * Create personal information with image uploads
-     */
     private function createPersonalInformation(string $userId, array $data): PersonalInformation
     {
         Log::info('Creating personal information for user', ['user_id' => $userId, 'has_files' => [
@@ -126,15 +123,12 @@ class UserService
 
         Log::info('Personal information paths after upload', [
             'user_id' => $userId,
-            'paths' => $personalInfoData
+            'paths' => $personalInfoData,
         ]);
 
         return PersonalInformation::create($personalInfoData);
     }
 
-    /**
-     * Create emergency contact
-     */
     private function createEmergencyContact(string $userId, array $data): EmergencyContact
     {
         return EmergencyContact::create([
@@ -148,22 +142,22 @@ class UserService
         ]);
     }
 
-    /**
-     * Upload document/image to storage
-     */
+
     private function uploadDocument(?UploadedFile $file, string $folder): ?string
     {
-        if (!$file) {
+        if (! $file) {
             Log::debug('No file provided for upload', ['folder' => $folder]);
+
             return null;
         }
 
-        if (!$file->isValid()) {
+        if (! $file->isValid()) {
             Log::warning('Invalid file upload attempted', [
                 'folder' => $folder,
                 'error' => $file->getErrorMessage(),
                 'original_name' => $file->getClientOriginalName(),
             ]);
+
             return null;
         }
 
@@ -207,9 +201,6 @@ class UserService
         }
     }
 
-    /**
-     * Clean up uploaded files if transaction fails
-     */
     private function cleanupUploadedFiles(): void
     {
         foreach ($this->uploadedFiles as $path) {
@@ -222,9 +213,6 @@ class UserService
         $this->uploadedFiles = [];
     }
 
-    /**
-     * Get list of users with optional filters and pagination
-     */
     public function listUsers(array $filters = []): array
     {
         $query = User::with(['role', 'credential', 'personalInformation', 'emergencyContact']);
@@ -233,40 +221,40 @@ class UserService
         $query->whereHas('credential');
 
         // Apply filters
-        if (!empty($filters['role'])) {
+        if (! empty($filters['role'])) {
             $query->whereHas('role', function ($q) use ($filters) {
                 $q->where('role', $filters['role']);
             });
         }
 
-        if (!empty($filters['gender'])) {
+        if (! empty($filters['gender'])) {
             $query->where('gender', $filters['gender']);
         }
 
-        if (!empty($filters['is_suspended'])) {
+        if (! empty($filters['is_suspended'])) {
             $query->where('is_suspended', filter_var($filters['is_suspended'], FILTER_VALIDATE_BOOLEAN));
         }
 
-        if (!empty($filters['nationality'])) {
-            $query->where('nationality', 'like', '%' . $filters['nationality'] . '%');
+        if (! empty($filters['nationality'])) {
+            $query->where('nationality', 'like', '%'.$filters['nationality'].'%');
         }
 
-        if (!empty($filters['search'])) {
+        if (! empty($filters['search'])) {
             $search = $filters['search'];
             $query->where(function ($q) use ($search) {
-                $q->where('first_name', 'like', '%' . $search . '%')
-                    ->orWhere('last_name', 'like', '%' . $search . '%')
+                $q->where('first_name', 'like', '%'.$search.'%')
+                    ->orWhere('last_name', 'like', '%'.$search.'%')
                     ->orWhereHas('credential', function ($cq) use ($search) {
-                        $cq->where('email', 'like', '%' . $search . '%')
-                            ->orWhere('username', 'like', '%' . $search . '%');
+                        $cq->where('email', 'like', '%'.$search.'%')
+                            ->orWhere('username', 'like', '%'.$search.'%');
                     });
             });
         }
 
         // Include or exclude soft deleted users
-        if (!empty($filters['with_trashed']) && $filters['with_trashed'] === 'true') {
+        if (! empty($filters['with_trashed']) && $filters['with_trashed'] === 'true') {
             $query->withTrashed();
-        } elseif (!empty($filters['only_trashed']) && $filters['only_trashed'] === 'true') {
+        } elseif (! empty($filters['only_trashed']) && $filters['only_trashed'] === 'true') {
             $query->onlyTrashed();
         }
 
@@ -310,7 +298,7 @@ class UserService
                         'professtional_photo' => $user->personalInformation->professtional_photo,
                         'professtional_photo_url' => $user->personalInformation->professtional_photo_url,
                         'nationality_card' => $user->personalInformation->nationality_card,
-                        'nationality_card_url'=> $user->personalInformation->nationality_card_url,
+                        'nationality_card_url' => $user->personalInformation->nationality_card_url,
                         'family_book' => $user->personalInformation->family_book,
                         'family_book_url' => $user->personalInformation->family_book_url,
                         'birth_certificate' => $user->personalInformation->birth_certificate,
@@ -334,14 +322,81 @@ class UserService
         ];
     }
 
-    /**
-     * Get user profile
-     */
+    public function listClients(array $filters = []): array
+    {
+        $query = Client::query()
+            ->select('id', 'company_name', 'company_code', 'phone_number');
+
+        if (!empty($filters['search'])) {
+            $search = $filters['search'];
+            $query->where('company_name', 'like', '%' . $search . '%');
+            $query->orWhere('company_code', 'like', '%' . $search . '%');
+            $query->orWhere('phone_number', 'like', '%' . $search . '%');
+        }
+
+        $sortBy = $filters['sort_by'] ?? 'company_name';
+        $sortOrder = $filters['sort_order'] ?? 'asc';
+
+        $allowedSortColumns = ['id', 'company_name', 'company_code', 'phone_number'];
+
+        if (!in_array($sortBy, $allowedSortColumns)) {
+            $sortBy = 'company_name';
+        }
+
+        $query->orderBy($sortBy, $sortOrder);
+
+        $limit = isset($filters['limit']) ? (int) $filters['limit'] : 20;
+
+        return $query->limit($limit)
+            ->get()
+            ->map(function ($client) {
+                return [
+                    'value' => $client->id,
+                    'label' => $client->company_name . ' - ' . $client->company_code . ' (' . $client->phone_number . ')',
+                ];
+            })
+            ->toArray();
+    }
+
+
+    public function listTrainers(array $filters = []): array
+    {
+        $query = User::with(['credential'])
+            ->where('role_id', config('constants.roles.trainer'))
+            ->whereHas('credential');
+
+        if (!empty($filters['search'])) {
+            $search = $filters['search'];
+            $query->where(function ($q) use ($search) {
+                $q->where('first_name', 'ilike', "%{$search}%")
+                    ->orWhere('last_name', 'ilike', "%{$search}%")
+                    ->orWhereHas('credential', function ($cq) use ($search) {
+                        $cq->where('phone_number', 'ilike', "%{$search}%");
+                    });
+            });
+        }
+
+        $sortBy = $filters['sort_by'] ?? 'created_at';
+        $sortOrder = $filters['sort_order'] ?? 'desc';
+        $query->orderBy($sortBy, $sortOrder);
+
+        if (empty($filters['search'])) {
+            $query->limit(isset($filters['limit']) ? (int) $filters['limit'] : 10);
+        }
+
+        return $query->get()
+            ->map(fn($trainer) => [
+                'value' => $trainer->id,
+                'label' => "{$trainer->first_name} {$trainer->last_name} ({$trainer->credential->phone_number})",
+            ])
+            ->toArray();
+    }
+
     public function getUserProfile(string $userId): array
     {
         $user = User::with(['role', 'credential', 'personalInformation', 'emergencyContact'])->find($userId);
 
-        if (!$user) {
+        if (! $user) {
             throw new UserNotFoundException('User not found', 0, null, ['user_id' => $userId]);
         }
 
@@ -395,44 +450,36 @@ class UserService
         return $profile;
     }
 
-    /**
-     * Suspend/Unsuspend user
-     */
     public function toggleSuspension(string $userId): User
     {
         $user = User::find($userId);
 
-        if (!$user) {
+        if (! $user) {
             throw new UserNotFoundException('User not found', 0, null, ['user_id' => $userId]);
         }
 
-        $user->update(['is_suspended' => !$user->is_suspended]);
+        $user->update(['is_suspended' => ! $user->is_suspended]);
 
         return $user;
     }
 
-    /**
-     * Soft delete user
-     */
+
     public function softDeleteUser(string $userId): bool
     {
         $user = User::find($userId);
 
-        if (!$user) {
+        if (! $user) {
             throw new UserNotFoundException('User not found', 0, null, ['user_id' => $userId]);
         }
 
         return $user->delete();
     }
 
-    /**
-     * Hard delete user (permanently delete)
-     */
     public function hardDeleteUser(string $userId): bool
     {
         $user = User::withTrashed()->find($userId);
 
-        if (!$user) {
+        if (! $user) {
             throw new UserNotFoundException('User not found', 0, null, ['user_id' => $userId]);
         }
 
@@ -444,18 +491,15 @@ class UserService
         return $user->forceDelete();
     }
 
-    /**
-     * Restore soft deleted user
-     */
     public function restoreUser(string $userId): User
     {
         $user = User::withTrashed()->find($userId);
 
-        if (!$user) {
+        if (! $user) {
             throw new UserNotFoundException('User not found', 0, null, ['user_id' => $userId]);
         }
 
-        if (!$user->trashed()) {
+        if (! $user->trashed()) {
             throw new \InvalidArgumentException('User is not soft deleted');
         }
 
@@ -464,9 +508,6 @@ class UserService
         return $user->load(['role', 'credential']);
     }
 
-    /**
-     * Update user information
-     */
     public function updateUserInformation(string $userId, array $userData, array $personalInfoData = [], array $emergencyContactData = []): User
     {
         $this->uploadedFiles = [];
@@ -475,22 +516,22 @@ class UserService
             return DB::transaction(function () use ($userId, $userData, $personalInfoData, $emergencyContactData) {
                 $user = User::find($userId);
 
-                if (!$user) {
+                if (! $user) {
                     throw new UserNotFoundException('User not found', 0, null, ['user_id' => $userId]);
                 }
 
                 // Update basic user information
-                if (!empty($userData)) {
+                if (! empty($userData)) {
                     $user->update($userData);
                 }
 
                 // Update personal information
-                if (!empty($personalInfoData)) {
+                if (! empty($personalInfoData)) {
                     $this->updatePersonalInformation($user, $personalInfoData);
                 }
 
                 // Update emergency contact
-                if (!empty($emergencyContactData)) {
+                if (! empty($emergencyContactData)) {
                     $this->updateEmergencyContact($user, $emergencyContactData);
                 }
 
@@ -506,16 +547,14 @@ class UserService
         }
     }
 
-    /**
-     * Update personal information with optional image uploads
-     */
     private function updatePersonalInformation(User $user, array $data): void
     {
         $personalInfo = $user->personalInformation;
 
-        if (!$personalInfo) {
+        if (! $personalInfo) {
             // Create if doesn't exist
             $this->createPersonalInformation($user->id, $data);
+
             return;
         }
 
@@ -562,30 +601,25 @@ class UserService
             $updateData['social_media'] = $data['social_media'];
         }
 
-        if (!empty($updateData)) {
+        if (! empty($updateData)) {
             $personalInfo->update($updateData);
         }
     }
 
-    /**
-     * Update emergency contact
-     */
     private function updateEmergencyContact(User $user, array $data): void
     {
         $emergencyContact = $user->emergencyContact;
 
-        if (!$emergencyContact) {
+        if (! $emergencyContact) {
             // Create if doesn't exist
             $this->createEmergencyContact($user->id, $data);
+
             return;
         }
 
         $emergencyContact->update($data);
     }
 
-    /**
-     * Delete personal information files from storage
-     */
     private function deletePersonalInformationFiles(PersonalInformation $personalInfo): void
     {
         $files = [

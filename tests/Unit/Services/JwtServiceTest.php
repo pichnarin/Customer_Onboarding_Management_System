@@ -2,20 +2,18 @@
 
 namespace Tests\Unit\Services;
 
-use Tests\TestCase;
-use App\Services\JwtService;
-use App\Models\User;
-use App\Models\RefreshToken;
-use App\Exceptions\JwtKeyNotFoundException;
+use App\Exceptions\AccountSuspendedException;
 use App\Exceptions\InvalidTokenException;
-use App\Exceptions\TokenExpiredException;
 use App\Exceptions\InvalidTokenTypeException;
 use App\Exceptions\RefreshTokenRevokedException;
+use App\Exceptions\TokenExpiredException;
 use App\Exceptions\UserNotFoundException;
-use App\Exceptions\AccountSuspendedException;
-use Carbon\Carbon;
+use App\Models\RefreshToken;
+use App\Models\User;
+use App\Services\JwtService;
 use Firebase\JWT\JWT;
 use Firebase\JWT\Key;
+use Tests\TestCase;
 
 class JwtServiceTest extends TestCase
 {

@@ -2,9 +2,9 @@
 
 namespace Database\Seeders;
 
-use App\Models\User;
 use App\Models\Credential;
 use App\Models\Role;
+use App\Models\User;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
 
@@ -19,6 +19,7 @@ class AdminSeeder extends Seeder
 
         if ($existingAdmin) {
             $this->command->info('Admin user already exists: admin');
+
             return;
         }
 
@@ -36,7 +37,7 @@ class AdminSeeder extends Seeder
 
         Credential::create([
             'user_id' => $admin->id,
-            'email' => 'pichnarin893@gmail.com',
+            'email' => 'admin.demo@checkinme.com',
             'username' => 'admin',
             'phone_number' => '+1234567890',
             'password' => Hash::make('Admin@123456'),
