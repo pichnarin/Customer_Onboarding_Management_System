@@ -11,59 +11,56 @@ use App\Http\Controllers\SystemController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Redis;
 
-Route::get('/health', function () {
-    return response()->json([
+
+Route::get('/healthcheck', function () {
+    $status = [
         'status' => 'OK',
-        'message' => 'Customer Onboarding Management API is running smoothly.',
-    ]);
-});
+        'php_version' => phpversion(),
+        'database' => ['status' => 'unknown'],
+        'redis' => ['status' => 'unknown'],
+    ];
 
-Route::get('/debug-db', function () {
+    $httpCode = 200;
+
     try {
-        $connection = config('database.default');
-        $config = config("database.connections.{$connection}");
-
-        // Test database connection
         DB::connection()->getPdo();
         $dbName = DB::connection()->getDatabaseName();
-
-        // Count users
-        $userCount = DB::table('users')->count();
-        $credentialCount = DB::table('credentials')->count();
-
-        return response()->json([
+        $status['database'] = [
             'status' => 'connected',
-            'connection' => $connection,
             'database' => $dbName,
-            'host' => $config['host'] ?? 'N/A',
-            'port' => $config['port'] ?? 'N/A',
-            'username' => $config['username'] ?? 'N/A',
-            'driver' => $config['driver'] ?? 'N/A',
-            'counts' => [
-                'users' => $userCount,
-                'credentials' => $credentialCount,
-            ],
-            'env_check' => [
-                'DB_CONNECTION' => env('DB_CONNECTION'),
-                'DB_HOST' => env('DB_HOST'),
-                'DB_PORT' => env('DB_PORT'),
-                'DB_DATABASE' => env('DB_DATABASE'),
-                'DB_USERNAME' => env('DB_USERNAME'),
-            ],
-        ]);
+        ];
     } catch (\Exception $e) {
-        return response()->json([
+        $status['database'] = [
             'status' => 'error',
-            'message' => $e->getMessage(),
-            'env_check' => [
-                'DB_CONNECTION' => env('DB_CONNECTION'),
-                'DB_HOST' => env('DB_HOST'),
-                'DB_PORT' => env('DB_PORT'),
-                'DB_DATABASE' => env('DB_DATABASE'),
-            ],
-        ], 500);
+            'message' => 'Database connection failed',
+        ];
+        $httpCode = 500;
     }
+
+    try {
+        Redis::ping();
+        $status['redis'] = [
+            'status' => 'connected',
+        ];
+    } catch (\Exception $e) {
+        $status['redis'] = [
+            'status' => 'error',
+            'message' => 'Redis connection failed',
+        ];
+        $httpCode = 500;
+    }
+
+    if ($httpCode === 500) {
+        $status['status'] = 'ERROR';
+        $status['message'] = 'Some services are down';
+    } else {
+        $status['status'] = 'OK';
+        $status['message'] = 'Customer Onboarding Management API is running smoothly.';
+    }
+
+    return response()->json($status, $httpCode);
 });
 
 Route::prefix('auth')->group(function () {
