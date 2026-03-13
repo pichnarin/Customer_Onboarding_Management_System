@@ -347,22 +347,14 @@ class UserService
 
         $limit = isset($filters['limit']) ? (int) $filters['limit'] : 20;
 
-        return $query->limit($limit)
-            ->get()
-            ->map(function ($client) {
-                return [
-                    'value' => $client->id,
-                    'label' => $client->company_name . ' - ' . $client->company_code . ' (' . $client->phone_number . ')',
-                ];
-            })
-            ->toArray();
+        return $query->limit($limit)->get()->toArray();
     }
 
 
     public function listTrainers(array $filters = []): array
     {
         $query = User::with(['credential'])
-            ->where('role_id', config('constants.roles.trainer'))
+            ->whereHas('role', fn ($q) => $q->where('role', 'trainer'))
             ->whereHas('credential');
 
         if (!empty($filters['search'])) {
@@ -384,12 +376,7 @@ class UserService
             $query->limit(isset($filters['limit']) ? (int) $filters['limit'] : 10);
         }
 
-        return $query->get()
-            ->map(fn($trainer) => [
-                'value' => $trainer->id,
-                'label' => "{$trainer->first_name} {$trainer->last_name} ({$trainer->credential->phone_number})",
-            ])
-            ->toArray();
+        return $query->get(['id', 'first_name', 'last_name'])->toArray();
     }
 
     public function getUserProfile(string $userId): array

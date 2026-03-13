@@ -8,21 +8,24 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::create('session_students', function (Blueprint $table) {
+        Schema::create('appointment_students', function (Blueprint $table) {
             $table->uuid('id')->primary();
-            $table->uuid('session_id');
+            $table->uuid('appointment_id');
             $table->string('name', 255)->nullable();
             $table->string('phone_number', 20)->nullable();
             $table->string('profession', 100)->nullable();
+            $table->enum('attendance_status', ['present', 'absent'])->nullable();
             $table->timestamps();
 
-            $table->foreign('session_id')->references('id')->on('training_sessions')->cascadeOnDelete();
-            $table->index('session_id');
+            $table->foreign('appointment_id')->references('id')->on('appointments')->cascadeOnDelete();
+
+            $table->index('appointment_id');
+            $table->index('phone_number');
         });
     }
 
     public function down(): void
     {
-        Schema::dropIfExists('session_students');
+        Schema::dropIfExists('appointment_students');
     }
 };

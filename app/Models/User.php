@@ -95,14 +95,14 @@ class User extends Authenticatable
         return $this->hasMany(Client::class, 'assigned_sale_id');
     }
 
-    public function createdOnboardingRequests(): HasMany
+    public function appointments(): HasMany
     {
-        return $this->hasMany(OnboardingRequest::class, 'created_by_user_id');
+        return $this->hasMany(Appointment::class, 'trainer_id');
     }
 
-    public function trainingAssignments(): HasMany
+    public function onboardingRequests(): HasMany
     {
-        return $this->hasMany(TrainingAssignment::class, 'trainer_id');
+        return $this->hasMany(OnboardingRequest::class, 'trainer_id');
     }
 
     public function notifications(): HasMany
