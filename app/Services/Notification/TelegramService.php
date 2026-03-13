@@ -2,10 +2,8 @@
 
 namespace App\Services\Notification;
 
-use App\Jobs\SendTelegramNotification;
 use App\Models\ClientContact;
 use App\Models\TelegramMessage;
-use App\Models\TrainingSession;
 use Illuminate\Support\Facades\Http;
 
 class TelegramService
@@ -15,22 +13,6 @@ class TelegramService
     public function __construct()
     {
         $this->botToken = config('services.telegram.bot_token', '');
-    }
-
-    public function sendSessionNotification(TrainingSession $session, string $messageType): void
-    {
-        $attendees = $session->attendees()->with('clientContact')->get();
-
-        foreach ($attendees as $attendee) {
-            if ($attendee->clientContact && $attendee->clientContact->telegram_chat_id) {
-                SendTelegramNotification::dispatch(
-                    $attendee->clientContact,
-                    $messageType,
-                    ['session' => $session->toArray()],
-                    $session->id
-                );
-            }
-        }
     }
 
     public function sendToContact(ClientContact $contact, string $messageType, array $context): void

@@ -40,8 +40,8 @@ class Media extends Model
         return $this->belongsTo(User::class, 'uploaded_by_user_id');
     }
 
-    public function sessionMaterials(): HasMany
+    public function appointmentMaterials(): HasMany
     {
-        return $this->hasMany(SessionMaterial::class);
+        return $this->hasMany(AppointmentMaterial::class);
     }
 }

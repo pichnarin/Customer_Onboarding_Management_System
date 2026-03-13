@@ -26,13 +26,8 @@ class System extends Model
         return $this->hasMany(UserSystemAccess::class);
     }
 
-    public function onboardingStages(): HasMany
+    public function appointments(): HasMany
     {
-        return $this->hasMany(OnboardingStage::class);
-    }
-
-    public function onboardingRequests(): HasMany
-    {
-        return $this->hasMany(OnboardingRequest::class);
+        return $this->hasMany(Appointment::class);
     }
 }
