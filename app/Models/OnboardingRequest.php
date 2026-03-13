@@ -6,63 +6,70 @@ use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class OnboardingRequest extends Model
 {
-    use HasUuids;
+    use HasUuids, SoftDeletes;
 
-    protected $fillable = [
-        'request_code',
-        'client_id',
-        'system_id',
-        'created_by_user_id',
-        'priority',
-        'status',
-        'notes',
-        'expected_start_date',
-        'expected_end_date',
-        'actual_start_date',
-        'actual_end_date',
-    ];
-
-    protected $casts = [
-        'id' => 'string',
-        'client_id' => 'string',
-        'system_id' => 'string',
-        'created_by_user_id' => 'string',
-        'expected_start_date' => 'date',
-        'expected_end_date' => 'date',
-        'actual_start_date' => 'date',
-        'actual_end_date' => 'date',
-    ];
+    protected $table = 'onboarding_requests';
 
     public $incrementing = false;
 
     protected $keyType = 'string';
 
+    protected $fillable = [
+        'request_code',
+        'appointment_id',
+        'client_id',
+        'trainer_id',
+        'status',
+        'progress_percentage',
+        'completed_at',
+    ];
+
+    protected $casts = [
+        'id' => 'string',
+        'appointment_id' => 'string',
+        'client_id' => 'string',
+        'trainer_id' => 'string',
+        'progress_percentage' => 'float',
+        'completed_at' => 'datetime',
+    ];
+
+    public function appointment(): BelongsTo
+    {
+        return $this->belongsTo(Appointment::class, 'appointment_id');
+    }
+
     public function client(): BelongsTo
     {
-        return $this->belongsTo(Client::class);
+        return $this->belongsTo(Client::class, 'client_id');
     }
 
-    public function system(): BelongsTo
+    public function trainer(): BelongsTo
     {
-        return $this->belongsTo(System::class);
+        return $this->belongsTo(User::class, 'trainer_id');
     }
 
-    public function createdBy(): BelongsTo
+    public function companyInfo(): HasOne
     {
-        return $this->belongsTo(User::class, 'created_by_user_id');
+        return $this->hasOne(OnboardingCompanyInfo::class, 'onboarding_id');
     }
 
-    public function assignments(): HasMany
+    public function systemAnalysis(): HasOne
     {
-        return $this->hasMany(TrainingAssignment::class);
+        return $this->hasOne(OnboardingSystemAnalysis::class, 'onboarding_id');
     }
 
-    public function comments(): HasMany
+    public function policies(): HasMany
     {
-        return $this->hasMany(Comment::class, 'commentable_id')
-            ->where('commentable_type', 'onboarding_request');
+        return $this->hasMany(OnboardingPolicy::class, 'onboarding_id');
+    }
+
+    public function lessons(): HasMany
+    {
+        return $this->hasMany(OnboardingLesson::class, 'onboarding_id');
     }
 }

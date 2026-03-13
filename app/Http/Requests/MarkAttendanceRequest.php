@@ -16,8 +16,7 @@ class MarkAttendanceRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'attendance_status' => ['required', 'in:attended,absent'],
-            'notes' => ['nullable', 'string', 'max:1000'],
+            'attendance_status' => ['required', 'in:present,absent'],
         ];
     }
 
@@ -26,7 +25,7 @@ class MarkAttendanceRequest extends FormRequest
         throw new HttpResponseException(response()->json([
             'success' => false,
             'message' => 'Validation errors',
-            'errors' => $validator->errors(),
+            'errors'  => $validator->errors(),
         ], 422));
     }
 }

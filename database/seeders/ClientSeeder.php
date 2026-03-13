@@ -30,9 +30,7 @@ class ClientSeeder extends Seeder
             'Street 271, Sangkat Toul Tum Poung, Khan Chamkarmon, Phnom Penh',
             ['facebook' => 'https://facebook.com/alphatech', 'linkedin' => 'https://linkedin.com/company/alphatech', 'telegram' => 'https://t.me/alphatech'],
             true,
-            DemoUserSeeder::SALE_USER_ID,
-            MediaSeeder::LOGO_1_ID,
-            MediaSeeder::BANNER_1_ID
+            DemoUserSeeder::SALE_USER_ID
         );
 
         $this->createClient(
@@ -45,9 +43,7 @@ class ClientSeeder extends Seeder
             'National Road 6A, Russei Keo, Phnom Penh',
             ['facebook' => 'https://facebook.com/betalogistics', 'telegram' => 'https://t.me/betalogistics'],
             true,
-            DemoUserSeeder::SALE_USER_ID,
-            MediaSeeder::LOGO_2_ID,
-            MediaSeeder::BANNER_2_ID
+            DemoUserSeeder::SALE_USER_ID
         );
 
         $this->createClient(

@@ -39,11 +39,6 @@ class ClientContact extends Model
         return $this->belongsTo(Client::class);
     }
 
-    public function sessionAttendees(): HasMany
-    {
-        return $this->hasMany(SessionAttendee::class);
-    }
-
     public function notifications(): HasMany
     {
         return $this->hasMany(Notification::class);

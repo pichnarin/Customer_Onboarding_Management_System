@@ -18,13 +18,11 @@ class TelegramMessage extends Model
         'sent_at',
         'delivery_status',
         'error_message',
-        'related_session_id',
     ];
 
     protected $casts = [
         'id' => 'string',
         'client_contact_id' => 'string',
-        'related_session_id' => 'string',
         'sent_at' => 'datetime',
     ];
 
@@ -37,8 +35,4 @@ class TelegramMessage extends Model
         return $this->belongsTo(ClientContact::class);
     }
 
-    public function relatedSession(): BelongsTo
-    {
-        return $this->belongsTo(TrainingSession::class, 'related_session_id');
-    }
 }
